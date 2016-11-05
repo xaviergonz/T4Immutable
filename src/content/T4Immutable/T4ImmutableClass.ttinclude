@@ -1,7 +1,6 @@
 ﻿<#@ assembly Name="System.Core" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="EnvDTE80" #>
-<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Diagnostics" #>
@@ -43,7 +42,7 @@ public class ClassInfo {
   public ClassInfo(CodeClass thisClass) {
     CodeClass = (EnvDTE80.CodeClass2)thisClass;
 
-    const string T4ImmutableClassAttribute = nameof(T4Immutable) + "." + nameof(T4Immutable.ImmutableClassAttribute);
+    const string T4ImmutableClassAttribute = "T4Immutable.ImmutableClassAttribute";
     ImmutableAttribute = FindAttribute(thisClass.Attributes, T4ImmutableClassAttribute) as EnvDTE80.CodeAttribute2;
     RelevantFields = thisClass.Members.OfType<CodeVariable>().Select(p => new FieldInfo(p)).Where(p => p.Relevant).ToList();
     RelevantProps = thisClass.Members.OfType<CodeProperty>().Select(p => new PropInfo(p)).Where(p => p.Relevant).ToList();

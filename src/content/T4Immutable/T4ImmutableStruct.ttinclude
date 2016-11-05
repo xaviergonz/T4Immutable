@@ -1,7 +1,6 @@
 ﻿<#@ assembly Name="System.Core" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="EnvDTE80" #>
-<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Diagnostics" #>

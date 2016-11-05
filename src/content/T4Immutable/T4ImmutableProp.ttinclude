@@ -1,7 +1,6 @@
 ﻿<#@ assembly Name="System.Core" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="EnvDTE80" #>
-<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Diagnostics" #>
@@ -33,7 +32,7 @@ public class PropInfo {
   public PropInfo(CodeProperty prop) {
     CodeProperty = (EnvDTE80.CodeProperty2)prop;
 
-    const string T4ImmutableComputedPropertyAttribute = nameof(T4Immutable) + "." + nameof(T4Immutable.ComputedPropertyAttribute);
+    const string T4ImmutableComputedPropertyAttribute = "T4Immutable.ComputedPropertyAttribute";
     Computed = FindAttribute(prop.Attributes, T4ImmutableComputedPropertyAttribute) != null;
 
     NotNull = FindAttribute(prop.Attributes, NotNullAttribute) != null;

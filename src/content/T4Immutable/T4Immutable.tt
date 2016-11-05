@@ -10,7 +10,6 @@
 <#@ assembly Name="System.Core" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="EnvDTE80" #>
-<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
 <#@ import namespace="System.Diagnostics" #>
@@ -112,41 +111,41 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
     if (arg.Name == "Options") {
       var options = val.Split(new char[] { ' ', '|', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
       foreach (var option in options) {
-        if (option.EndsWith("." + nameof(T4Immutable.ImmutableClassOptions.DisableEquals))) {
+        if (option.EndsWith(".DisableEquals")) {
           enableEquals = false;
         }
-        else if (option.EndsWith("." + nameof(T4Immutable.ImmutableClassOptions.DisableGetHashCode))) {
+        else if (option.EndsWith(".DisableGetHashCode")) {
           enableGetHashCode = false;
         }
-        else if (option.EndsWith("." + nameof(T4Immutable.ImmutableClassOptions.EnableOperatorEquals))) {
+        else if (option.EndsWith(".EnableOperatorEquals")) {
           enableOperatorEquals = true;
         }
-        else if (option.EndsWith("." + nameof(T4Immutable.ImmutableClassOptions.DisableToString))) {
+        else if (option.EndsWith(".DisableToString")) {
           enableToString = false;
         }
-        else if (option.EndsWith("." + nameof(T4Immutable.ImmutableClassOptions.DisableWith))) {
+        else if (option.EndsWith(".DisableWith")) {
           enableWith = false;
         }
       }
     }
     else if (arg.Name == "ConstructorAccessLevel") {
-      if (val.EndsWith("." + nameof(T4Immutable.ConstructorAccessLevel.Public))) {
+      if (val.EndsWith(".Public")) {
         constructorAccessLevel = "public";
       }
-      else if (val.EndsWith("." + nameof(T4Immutable.ConstructorAccessLevel.Protected))) {
+      else if (val.EndsWith(".Protected")) {
         constructorAccessLevel = "protected";
       }
-      else if (val.EndsWith("." + nameof(T4Immutable.ConstructorAccessLevel.Internal))) {
+      else if (val.EndsWith(".Internal")) {
         constructorAccessLevel = "internal";
       }
-      else if (val.EndsWith("." + nameof(T4Immutable.ConstructorAccessLevel.Private))) {
+      else if (val.EndsWith(".Private")) {
         constructorAccessLevel = "private";
       }
-      else if (val.EndsWith("." + nameof(T4Immutable.ConstructorAccessLevel.ProtectedInternal))) {
+      else if (val.EndsWith(".ProtectedInternal")) {
         constructorAccessLevel = "protected internal";
       }
       else {
-        throw new T4ImmutableException(fileName, info.FullName, "Error parsing " + nameof(T4Immutable.ConstructorAccessLevel) + " argument of " + nameof(T4Immutable.ImmutableClassAttribute));
+        throw new T4ImmutableException(fileName, info.FullName, "Error parsing ConstructorAccessLevel argument of ImmutableClassAttribute");
       }
     }
   }
