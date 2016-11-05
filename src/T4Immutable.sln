@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T4Immutable", "T4Immutable\T4Immutable.csproj", "{DD40C8DA-A45D-43E9-A9FD-4907E0D7D747}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{9B18F400-9723-41A7-BFE9-9566F5BBF812}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4Immutable", "T4Immutable", "{1CC7F4B4-E394-495B-90BD-5B1C6420CC90}"
+	ProjectSection(SolutionItems) = preProject
+		content\T4Immutable\T4Immutable.tt = content\T4Immutable\T4Immutable.tt
+		content\T4Immutable\T4ImmutableClass.ttinclude = content\T4Immutable\T4ImmutableClass.ttinclude
+		content\T4Immutable\T4ImmutableField.ttinclude = content\T4Immutable\T4ImmutableField.ttinclude
+		content\T4Immutable\T4ImmutableGlobals.ttinclude = content\T4Immutable\T4ImmutableGlobals.ttinclude
+		content\T4Immutable\T4ImmutableProp.ttinclude = content\T4Immutable\T4ImmutableProp.ttinclude
+		content\T4Immutable\T4ImmutableStruct.ttinclude = content\T4Immutable\T4ImmutableStruct.ttinclude
+		content\T4Immutable\TemplateFileManagerV2.1.ttinclude = content\T4Immutable\TemplateFileManagerV2.1.ttinclude
+		content\T4Immutable\VisualStudioHelper.ttinclude = content\T4Immutable\VisualStudioHelper.ttinclude
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD40C8DA-A45D-43E9-A9FD-4907E0D7D747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD40C8DA-A45D-43E9-A9FD-4907E0D7D747}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD40C8DA-A45D-43E9-A9FD-4907E0D7D747}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD40C8DA-A45D-43E9-A9FD-4907E0D7D747}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1CC7F4B4-E394-495B-90BD-5B1C6420CC90} = {9B18F400-9723-41A7-BFE9-9566F5BBF812}
+	EndGlobalSection
+EndGlobal

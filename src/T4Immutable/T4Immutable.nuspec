@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Javier González Garcés</authors>
+    <owners>xaviergonz</owners>
+    <licenseUrl>https://github.com/xaviergonz/T4Immutable/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/xaviergonz/T4Immutable</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>T4MVC is a T4 template for ASP.NET MVC apps that creates strongly typed helpers that eliminate the use of literal strings in many places.</description>
+    <releaseNotes>First release.</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>t4 immutable codegen</tags>
+  </metadata>
+  <files>
+    <file src="..\content\**\*.*" target="content"/>
+  </files>
+</package>

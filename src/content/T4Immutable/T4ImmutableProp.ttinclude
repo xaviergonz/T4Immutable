@@ -1,0 +1,94 @@
+﻿<#@ assembly Name="System.Core" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="EnvDTE80" #>
+<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#@ import namespace="EnvDTE" #>
+<#+
+public class PropInfo {
+  private const string NotNullAttribute = "JetBrains.Annotations.NotNullAttribute";
+
+  public EnvDTE80.CodeProperty2 CodeProperty { get; }
+  public string Name { get { return CodeProperty.Name; } }
+  public string FullName { get { return CodeProperty.FullName; } }
+  public CodeFunction Getter { get { return CodeProperty.Getter; } }
+  public CodeFunction Setter { get { return CodeProperty.Setter; } }
+  public bool Computed { get; }
+  public bool NotNull { get; }
+  public string TypeString { get; }
+  public string ParamName { get; }
+  public FieldInfo DefaultValue { get; private set; }
+
+  public bool Relevant {
+    get {
+      return !Computed;
+    }
+  }
+
+  public PropInfo(CodeProperty prop) {
+    CodeProperty = (EnvDTE80.CodeProperty2)prop;
+
+    const string T4ImmutableComputedPropertyAttribute = nameof(T4Immutable) + "." + nameof(T4Immutable.ComputedPropertyAttribute);
+    Computed = FindAttribute(prop.Attributes, T4ImmutableComputedPropertyAttribute) != null;
+
+    NotNull = FindAttribute(prop.Attributes, NotNullAttribute) != null;
+    TypeString = CodeProperty.Type.AsString;
+    ParamName = ToCamelCase(Name);
+  }
+
+  public string ToFullParam(bool includeNotNull, bool includeAssign) {
+    var str = "";
+    if (includeNotNull && NotNull) {
+      str += "[" + NotNullAttribute + "] ";
+    }
+    str += TypeString + " " + ParamName;
+    if (includeAssign && DefaultValue != null) {
+      str += " = " + DefaultValue.InitExpressionString;
+    }
+    return str;
+  }
+
+  public string ToWithParam() {
+    return "T4Immutable.WithParam<" + TypeString + "> " + ParamName + " = default(T4Immutable.WithParam<" + TypeString + ">)";
+  }
+
+  public void UpdateDefaultValue(List<FieldInfo> fields) {
+    DefaultValue = fields.FirstOrDefault(f => f.Name == Name + "DefaultValue");
+  }
+
+  public void Validate(string fileName) {
+    if (!Relevant) {
+      throw new T4ImmutableException(fileName, FullName, "Unrelevant immutable property (internal error)");
+    }
+
+    // make sure the default value (if any) type matches
+    if (DefaultValue != null) {
+      if (DefaultValue.TypeString != TypeString) {
+        throw new T4ImmutableException(fileName, FullName, "Immutable property type (" + TypeString + ") does not match " + DefaultValue.Name + " type (" + DefaultValue.TypeString + ")");
+      }
+    }
+
+    // make sure all of them have getters
+    if (Getter == null) {
+      throw new T4ImmutableException(fileName, FullName, "Immutable property must have a getter");
+    }
+
+    // make sure none of them have public setters
+    if (Setter != null && Setter.Access == vsCMAccess.vsCMAccessPublic) {
+      throw new T4ImmutableException(fileName, FullName, "Immutable property setter must not be public");
+    }
+
+    // and they are not static
+    if (CodeProperty.IsShared) {
+      throw new T4ImmutableException(fileName, FullName, "Immutable property must not be static");
+    }
+
+    // TODO: check override? not sure why we would though
+  }
+}
+#>

@@ -1,0 +1,56 @@
+﻿<#@ assembly Name="System.Core" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="EnvDTE80" #>
+<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#@ import namespace="EnvDTE" #>
+<#+
+public class StructInfo {
+  public EnvDTE80.CodeStruct2 CodeStruct { get; }
+  public bool Generated { get; }
+  public ClassInfo ParentClass { get; }
+  public StructInfo ParentStruct { get; }
+
+  public string Name { get { return CodeStruct.Name; } } 
+  public string FullName { get { return  CodeStruct.FullName; } }
+  public EnvDTE.CodeNamespace CodeNamespace { get { return CodeStruct.Namespace; } } 
+  public string GenericString { get; }
+
+  public string Namespace { 
+    get {
+      return CodeNamespace != null ? CodeNamespace.FullName : "";
+    } 
+  }
+
+  public string TypeString { get { return "struct"; } }
+
+  public StructInfo(CodeStruct thisStruct) {
+    CodeStruct = (EnvDTE80.CodeStruct2)thisStruct;
+
+    Generated = FindAttribute(thisStruct.Attributes, GeneratedAttribute) != null;
+    GenericString = ExtractGeneric(FullName);
+
+    var parentClass = CodeStruct.Parent as EnvDTE80.CodeClass2;
+    var parentStruct = CodeStruct.Parent as EnvDTE80.CodeStruct2;
+    ParentClass = parentClass == null ? null : new ClassInfo(parentClass);
+    ParentStruct = parentStruct == null ? null : new StructInfo(parentStruct);
+  }
+
+  public void MarkAsPartial() {
+    if (CodeStruct.DataTypeKind != EnvDTE80.vsCMDataTypeKind.vsCMDataTypeKindPartial) {
+      try {
+        CodeStruct.DataTypeKind = EnvDTE80.vsCMDataTypeKind.vsCMDataTypeKindPartial;
+      }
+      catch {
+        AddWarning("Unable to mark struct " + FullName + " as partial. Please change it manually if possible");
+      }
+    }
+  }
+
+}
+#>

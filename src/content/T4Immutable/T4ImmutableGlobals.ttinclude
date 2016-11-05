@@ -1,0 +1,96 @@
+﻿<#@ assembly Name="System.Core" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="EnvDTE80" #>
+<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#@ import namespace="EnvDTE" #>
+<#
+TT = this;
+VSH = this.VisualStudioHelper;
+#>
+<#+
+const string GeneratedAttribute = "System.CodeDom.Compiler.GeneratedCodeAttribute";
+
+static TextTransformation TT;
+static AutomationHelper VSH;
+
+static void AddWarning(string str) {
+  TT.Warning("T4Immutable: " + str);
+}
+
+static void AddError(string str) {
+  TT.Error("T4Immutable: " + str);
+}
+
+static CodeAttribute FindAttribute(CodeElements attribs, string fullName) {
+  return attribs.OfType<CodeAttribute>().FirstOrDefault(att => att.FullName == fullName);
+}
+
+static string ToCamelCase(string theString) {
+  // convert from pascal to camel case
+  string outStr = "";
+  bool converting = true;
+  for (int i = 0; i < theString.Length; i++) {
+    string c = theString[i].ToString();
+    if (converting) {
+      string lowerC = c.ToLowerInvariant();
+      bool isLowerCase = lowerC == c;
+      if (isLowerCase) {
+        converting = false;
+      }
+      else {
+        c = lowerC;
+      }
+    }
+    outStr += c;
+  }
+  return outStr;
+}
+
+static string ExtractGeneric(string str) {
+  int indexOf = str.IndexOf("<");
+  if (indexOf < 0) return "";
+  return str.Substring(indexOf);
+}
+
+public class T4ImmutableException : Exception {
+  public T4ImmutableException(string fileName, string itemName, string msg) : base(fileName + " - " + itemName + " - " + msg) {
+  }
+}
+
+public class ClassWriter {
+  private List<string> Lines { get; }
+
+  public ClassWriter() {
+    Lines = new List<string>();
+  }
+
+  public void WI(int indentation, string line) {
+    const int indentSize = 2;
+    string str = "";
+    for (int i = 0; i < indentation * indentSize; i++) {
+      str += " ";
+    }
+    Lines.Add(str + line);
+  }
+
+  public void WIGenerated(int indentation) {
+    WI(indentation, "[System.CodeDom.Compiler.GeneratedCode(\"T4Immutable\", \"1.0\"), System.Diagnostics.DebuggerNonUserCode]");
+  }
+
+  public void Clear() {
+    Lines.Clear();
+  }
+
+  public void WriteOut() {
+    foreach (var line in Lines) {
+      TT.WriteLine(line);
+    }
+  }
+}
+#>

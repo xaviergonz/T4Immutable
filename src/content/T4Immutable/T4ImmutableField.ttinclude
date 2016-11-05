@@ -1,0 +1,42 @@
+﻿<#@ assembly Name="System.Core" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="EnvDTE80" #>
+<#@ assembly name="$(TargetDir)T4Immutable.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#@ import namespace="EnvDTE" #>
+<#+
+public class FieldInfo {
+  public EnvDTE80.CodeVariable2 CodeVariable { get; }
+  public string Name { get { return CodeVariable.Name; } }
+  public string FullName { get { return CodeVariable.FullName; } }
+  public string TypeString { get; }
+  public bool Relevant { get; }
+  public string InitExpressionString { get; }
+
+  public FieldInfo(CodeVariable field) {
+    CodeVariable = (EnvDTE80.CodeVariable2)field;
+    TypeString = CodeVariable.Type.AsString;
+    InitExpressionString = CodeVariable.InitExpression as string;
+
+    // a field is relevant if it ends with "DefaultValue" and is "static readonly" or "const"
+    bool relevantName = Name.EndsWith("DefaultValue") && Name != "DefaultValue";
+    bool relevantModifiers = CodeVariable.IsConstant || (CodeVariable.IsShared && CodeVariable.ConstKind == EnvDTE80.vsCMConstKind.vsCMConstKindReadOnly);
+    Relevant = relevantName && relevantModifiers;
+  }
+
+  public void Validate(string fileName) {
+    if (!Relevant) {
+      throw new T4ImmutableException(fileName, FullName, "Unrelevant default value field (internal error)");
+    }
+
+    if (InitExpressionString == null) {
+      throw new T4ImmutableException(fileName, FullName, "Default value field cannot be uninitialized");
+    }
+  }
+}
+#>
