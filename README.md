@@ -14,7 +14,11 @@ class Person {
   public ing Age { get; }
   
   [ComputedProperty]
-  public string FullName => FirstName + " " + LastName;
+  public string FullName {
+    get {
+      return FirstName + " " + LastName;
+    }
+  }
 }
 ```
 
