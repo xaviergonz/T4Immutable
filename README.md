@@ -1,4 +1,6 @@
 # T4Immutable
+[![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
+
 T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
 
 Creating proper immutable objects in C# requires a lot boilerplate code. The aim of this project is to reduce this to a minimum by means of automatic code generation via T4 templates. For instance, given the following class:
