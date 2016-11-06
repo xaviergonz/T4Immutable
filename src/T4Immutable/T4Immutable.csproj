@@ -37,10 +37,13 @@
   <ItemGroup>
     <Compile Include="ComputedPropertyAttribute.cs" />
     <Compile Include="ConstructorAccessLevel.cs" />
+    <Compile Include="ConstructorParamNotNullAttribute.cs" />
     <Compile Include="GeneratedCodeAttribute.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="ImmutableClassAttribute.cs" />
     <Compile Include="ImmutableClassOptions.cs" />
+    <Compile Include="PostNotNullCheckAttribute.cs" />
+    <Compile Include="PreNotNullCheckAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WithParam.cs" />
   </ItemGroup>

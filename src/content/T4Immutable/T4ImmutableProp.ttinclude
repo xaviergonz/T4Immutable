@@ -10,17 +10,19 @@
 <#@ import namespace="EnvDTE" #>
 <#+
 public class PropInfo {
-  private const string NotNullAttribute = "JetBrains.Annotations.NotNullAttribute";
-
   public EnvDTE80.CodeProperty2 CodeProperty { get; }
   public string Name { get { return CodeProperty.Name; } }
   public string FullName { get { return CodeProperty.FullName; } }
   public CodeFunction Getter { get { return CodeProperty.Getter; } }
   public CodeFunction Setter { get { return CodeProperty.Setter; } }
   public bool Computed { get; }
-  public bool NotNull { get; }
+  public bool JetBrainsNotNull { get; }
+  public bool ConstructorParamNotNull { get; }
+  public bool PreNotNullCheck { get; }
+  public bool PostNotNullCheck { get; }
   public string TypeString { get; }
   public string ParamName { get; }
+  public string PreConstructorParamString { get; }
   public FieldInfo DefaultValue { get; private set; }
 
   public bool Relevant {
@@ -32,18 +34,34 @@ public class PropInfo {
   public PropInfo(CodeProperty prop) {
     CodeProperty = (EnvDTE80.CodeProperty2)prop;
 
-    const string T4ImmutableComputedPropertyAttribute = "T4Immutable.ComputedPropertyAttribute";
-    Computed = FindAttribute(prop.Attributes, T4ImmutableComputedPropertyAttribute) != null;
-
-    NotNull = FindAttribute(prop.Attributes, NotNullAttribute) != null;
+    Computed = FindAttribute(prop.Attributes, CustomImmutableComputedPropertyAttribute) != null;
     TypeString = CodeProperty.Type.AsString;
     ParamName = ToCamelCase(Name);
+
+    JetBrainsNotNull = FindAttribute(prop.Attributes, JetBrainsNotNullAttribute) != null;
+    PostNotNullCheck = JetBrainsNotNull || FindAttribute(prop.Attributes, CustomPostNotNullCheckAttribute) != null;
+
+    // speed up, do not process stuff we don't need
+    if (!Relevant) {
+      return;
+    }
+
+    ConstructorParamNotNull = FindAttribute(prop.Attributes, CustomConstructorParamNotNullAttribute) != null;
+    PreNotNullCheck = ConstructorParamNotNull || FindAttribute(prop.Attributes, CustomPreNotNullCheckAttribute) != null;
+    
+    var commentOptions = ParseCommentOptions(CodeProperty.ProjectItem.Name, FullName, CodeProperty.Comment, CustomCommentOptionDomain.Property);
+    if (commentOptions.ContainsKey(CustomPreConstructorParamCommentOption)) {
+      PreConstructorParamString = commentOptions[CustomPreConstructorParamCommentOption];
+    }
   }
 
-  public string ToFullParam(bool includeNotNull, bool includeAssign) {
+  public string ToFullParam(bool includeNotNull, bool includeAssign, bool includePre) {
     var str = "";
-    if (includeNotNull && NotNull) {
-      str += "[" + NotNullAttribute + "] ";
+    if (includePre && !string.IsNullOrWhiteSpace(PreConstructorParamString)) {
+      str += PreConstructorParamString + " ";
+    }
+    if (includeNotNull && ConstructorParamNotNull) {
+      str += "[" + RemoveAttributeTail(JetBrainsNotNullAttribute) + "] ";
     }
     str += TypeString + " " + ParamName;
     if (includeAssign && DefaultValue != null) {
@@ -53,14 +71,16 @@ public class PropInfo {
   }
 
   public string ToWithParam() {
-    return "T4Immutable.WithParam<" + TypeString + "> " + ParamName + " = default(T4Immutable.WithParam<" + TypeString + ">)";
+    return CustomNamespace + ".WithParam<" + TypeString + "> " + ParamName + " = default(T4Immutable.WithParam<" + TypeString + ">)";
   }
 
   public void UpdateDefaultValue(List<FieldInfo> fields) {
     DefaultValue = fields.FirstOrDefault(f => f.Name == Name + "DefaultValue");
   }
 
-  public void Validate(string fileName) {
+  public void Validate() {
+    string fileName = CodeProperty.ProjectItem.Name;
+
     if (!Relevant) {
       throw new T4ImmutableException(fileName, FullName, "Unrelevant immutable property (internal error)");
     }

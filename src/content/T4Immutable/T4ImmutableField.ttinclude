@@ -28,7 +28,9 @@ public class FieldInfo {
     Relevant = relevantName && relevantModifiers;
   }
 
-  public void Validate(string fileName) {
+  public void Validate() {
+    string fileName = CodeVariable.ProjectItem.Name;
+
     if (!Relevant) {
       throw new T4ImmutableException(fileName, FullName, "Unrelevant default value field (internal error)");
     }

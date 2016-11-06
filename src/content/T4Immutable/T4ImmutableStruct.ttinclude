@@ -31,7 +31,7 @@ public class StructInfo {
   public StructInfo(CodeStruct thisStruct) {
     CodeStruct = (EnvDTE80.CodeStruct2)thisStruct;
 
-    Generated = FindAttribute(thisStruct.Attributes, CustomGeneratedAttribute) != null;
+    Generated = FindAttribute(thisStruct.Attributes, CustomGeneratedCodeAttribute) != null;
 
     var parentClass = CodeStruct.Parent as EnvDTE80.CodeClass2;
     var parentStruct = CodeStruct.Parent as EnvDTE80.CodeStruct2;
@@ -46,12 +46,13 @@ public class StructInfo {
   }
 
   public void MarkAsPartial() {
+    string fileName = CodeStruct.ProjectItem.Name;
     if (CodeStruct.DataTypeKind != EnvDTE80.vsCMDataTypeKind.vsCMDataTypeKindPartial) {
       try {
         CodeStruct.DataTypeKind = EnvDTE80.vsCMDataTypeKind.vsCMDataTypeKindPartial;
       }
       catch {
-        AddWarning("Unable to mark struct " + FullName + " as partial. Please change it manually if possible");
+        AddWarning(fileName + " - Unable to mark struct " + FullName + " as partial. Please change it manually if possible");
       }
     }
   }

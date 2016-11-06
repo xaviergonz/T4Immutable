@@ -93,7 +93,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
 
   int ind = 0;
 
-  info.Validate(fileName);
+  info.Validate();
   var allProps = info.RelevantProps;
 
   // make our partial class with all the boilerplate
@@ -211,11 +211,11 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   // constructor
   {
     fw.WIGenerated(ind);
-    fw.WI(ind, constructorAccessLevel + " " + info.Name + "(" + string.Join(", ", allProps.Select(p => p.ToFullParam(true, true))) + ") {");
+    fw.WI(ind, constructorAccessLevel + " " + info.Name + "(" + string.Join(", ", allProps.Select(p => p.ToFullParam(true, true, true))) + ") {");
     ind++;
       
-    // null checks
-    foreach (var p in allProps.Where(p => p.NotNull)) {
+    // pre not-null checks
+    foreach (var p in allProps.Where(p => p.PreNotNullCheck)) {
       fw.WI(ind, "if (ReferenceEquals(" + p.ParamName + ", null)) throw new ArgumentNullException(nameof(" + p.ParamName + "));");
     }
 
@@ -228,6 +228,12 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
     if (info.HasPostConstructor) {
       fw.WI(ind, "PostConstructor();");
     }
+
+    // post not-null checks
+    foreach (var p in allProps.Where(p => p.PostNotNullCheck)) {
+      fw.WI(ind, "if (ReferenceEquals(this." + p.Name + ", null)) throw new NullReferenceException(nameof(this." + p.Name + "));");
+    }
+
     ind--;
     fw.WI(ind, "}");
     fw.WI(ind, "");
@@ -244,7 +250,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
       fw.WI(ind, "return true;");
     }
     else {
-      fw.WI(ind, "return " + string.Join(" && ", allProps.Select(p => "T4Immutable.Helpers.AreEqual(this." + p.Name + ", obj." + p.Name + ")")) + ";");
+      fw.WI(ind, "return " + string.Join(" && ", allProps.Select(p => CustomNamespace + ".Helpers.AreEqual(this." + p.Name + ", obj." + p.Name + ")")) + ";");
     }
     ind--;
     fw.WI(ind, "}");

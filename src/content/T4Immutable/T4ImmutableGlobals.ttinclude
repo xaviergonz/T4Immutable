@@ -11,24 +11,85 @@
 <#
 TT = this;
 VSH = this.VisualStudioHelper;
+
+CustomCommentOptions[CustomCommentOptionDomain.Class] = new string[] {
+};
+CustomCommentOptions[CustomCommentOptionDomain.Property] = new string[] {
+  CustomPreConstructorParamCommentOption
+};
 #>
 <#+
-const string CompilerGeneratedAttribute = "System.CodeDom.Compiler.GeneratedCodeAttribute";
-const string CustomGeneratedAttribute = "T4Immutable.GeneratedCodeAttribute";
+// constants
+const string ToolName = "T4Immutable";
+const string ToolVersion = "1.0.5";
+const string CustomNamespace = "T4Immutable";
 
+const string CustomGeneratedCodeAttribute = CustomNamespace + ".GeneratedCodeAttribute";
+
+// property attributes
+const string CustomPostNotNullCheckAttribute = CustomNamespace + ".PostNotNullCheckAttribute";
+const string CustomPreNotNullCheckAttribute = CustomNamespace + ".PreNotNullCheckAttribute";
+const string CustomConstructorParamNotNullAttribute = CustomNamespace + ".ConstructorParamNotNullAttribute";
+const string CustomImmutableComputedPropertyAttribute = CustomNamespace + ".ComputedPropertyAttribute";
+
+// class attributes
+const string CustomImmutableClassAttribute = CustomNamespace + ".ImmutableClassAttribute";
+
+// misc attributes
+const string CompilerGeneratedCodeAttribute = "System.CodeDom.Compiler.GeneratedCodeAttribute";
+const string JetBrainsNotNullAttribute = "JetBrains.Annotations.NotNullAttribute";
+const string DebuggerNonUserCodeAttribute = "System.Diagnostics.DebuggerNonUserCodeAttribute";
+
+// comment options
+enum CustomCommentOptionDomain {
+  Class,
+  Property
+}
+const string CustomPreConstructorParamCommentOption = CustomNamespace + ".PreConstructorParam";
+
+static readonly Dictionary<CustomCommentOptionDomain, string[]> CustomCommentOptions = new Dictionary<CustomCommentOptionDomain, string[]>();
 static TextTransformation TT;
 static AutomationHelper VSH;
 
 static void AddWarning(string str) {
-  TT.Warning("T4Immutable: " + str);
+  TT.Warning(ToolName + ": " + str);
 }
 
 static void AddError(string str) {
-  TT.Error("T4Immutable: " + str);
+  TT.Error(ToolName + ": " + str);
 }
 
 static CodeAttribute FindAttribute(CodeElements attribs, string fullName) {
   return attribs.OfType<CodeAttribute>().FirstOrDefault(att => att.FullName == fullName);
+}
+
+static Dictionary<string, string> ParseCommentOptions(string fileName, string itemName, string comment, CustomCommentOptionDomain domain) {
+  const string keyValueSep = ":";
+  var dict = new Dictionary<string, string>();
+  if (!string.IsNullOrWhiteSpace(comment)) {
+    var lines = comment.Split(new string[] {"\r", "\n"}, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+    foreach (var line in lines) {
+      // get option name
+      var sepIndex = line.IndexOf(keyValueSep);
+      if (sepIndex < 0) continue;
+      
+      var optionName = line.Substring(0, sepIndex).Trim();
+      if (string.IsNullOrWhiteSpace(optionName)) continue;
+      if (!optionName.StartsWith(CustomNamespace + ".")) continue;
+
+      if (dict.ContainsKey(optionName)) {
+        AddWarning(fileName + " - " + itemName + " - Comment option \"" + optionName + "\" duplicated");
+      }
+
+      if (!CustomCommentOptions[domain].Any(o => o == optionName)) {
+        AddWarning(fileName + " - " + itemName + " - Comment option \"" + optionName + "\" is unknown for domain " + domain);
+        continue;
+      }
+
+      dict[optionName] = line.Substring(sepIndex + 1).Trim();
+    }
+  }
+  return dict;
 }
 
 static string ToCamelCase(string theString) {
@@ -58,6 +119,14 @@ static string ExtractGeneric(string str) {
   return str.Substring(indexOf);
 }
 
+static string RemoveAttributeTail(string attr) {
+  const string attrTail = "Attribute";
+  if (attr.EndsWith(attrTail)) {
+    return attr.Substring(0, attr.Length - attrTail.Length);
+  }
+  return attr;
+}
+
 public class T4ImmutableException : Exception {
   public T4ImmutableException(string fileName, string itemName, string msg) : base(fileName + " - " + itemName + " - " + msg) {
   }
@@ -80,12 +149,12 @@ public class ClassWriter {
   }
 
   public void WIGenerated(int indentation, bool includeDebuggerNonUserCode = true, bool includeCompilerGenerated = true) {
-    string str = "[T4Immutable.GeneratedCode";
+    string str = "[" + RemoveAttributeTail(CustomGeneratedCodeAttribute);
     if (includeCompilerGenerated) {
-      str += ", System.CodeDom.Compiler.GeneratedCode(\"T4Immutable\", \"1.0\")";
+      str += ", " + RemoveAttributeTail(CompilerGeneratedCodeAttribute) + "(\"" + ToolName + "\", \"" + ToolVersion + "\")";
     }
     if (includeDebuggerNonUserCode) {
-      str += ", System.Diagnostics.DebuggerNonUserCode";
+      str += ", " + RemoveAttributeTail(DebuggerNonUserCodeAttribute);
     }
     str += "]";
     WI(indentation, str);

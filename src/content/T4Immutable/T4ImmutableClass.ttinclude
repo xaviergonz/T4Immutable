@@ -42,34 +42,41 @@ public class ClassInfo {
   public ClassInfo(CodeClass thisClass) {
     CodeClass = (EnvDTE80.CodeClass2)thisClass;
 
-    const string T4ImmutableClassAttribute = "T4Immutable.ImmutableClassAttribute";
-    ImmutableAttribute = FindAttribute(thisClass.Attributes, T4ImmutableClassAttribute) as EnvDTE80.CodeAttribute2;
-    RelevantFields = thisClass.Members.OfType<CodeVariable>().Select(p => new FieldInfo(p)).Where(p => p.Relevant).ToList();
-    RelevantProps = thisClass.Members.OfType<CodeProperty>().Select(p => new PropInfo(p)).Where(p => p.Relevant).ToList();
-    foreach (var prop in RelevantProps) {
-      prop.UpdateDefaultValue(RelevantFields);
-    }
-    Generated = FindAttribute(thisClass.Attributes, CustomGeneratedAttribute) != null;
+    ImmutableAttribute = FindAttribute(thisClass.Attributes, CustomImmutableClassAttribute) as EnvDTE80.CodeAttribute2;
+    Generated = FindAttribute(thisClass.Attributes, CustomGeneratedCodeAttribute) != null;
 
     var parentClass = CodeClass.Parent as EnvDTE80.CodeClass2;
     var parentStruct = CodeClass.Parent as EnvDTE80.CodeStruct2;
     ParentClass = parentClass == null ? null : new ClassInfo(parentClass);
     ParentStruct = parentStruct == null ? null : new StructInfo(parentStruct);
 
-    HasPostConstructor = thisClass.Members.OfType<EnvDTE80.CodeFunction2>().Any(m => IsPostConstructor(m));
-
     // fix for Foo<B>.Bar<C>
     var strippedFullName = FullName;
     if (ParentClass != null) strippedFullName = strippedFullName.Substring(ParentClass.FullName.Length + 1);
     if (ParentStruct != null) strippedFullName = strippedFullName.Substring(ParentStruct.FullName.Length + 1);
     GenericString = ExtractGeneric(strippedFullName);
+
+    // speed up, do not process stuff we don't need
+    if (!ShouldBeProcessed) {
+      return;
+    }
+
+    RelevantFields = thisClass.Members.OfType<CodeVariable>().Select(p => new FieldInfo(p)).Where(p => p.Relevant).ToList();
+    RelevantProps = thisClass.Members.OfType<CodeProperty>().Select(p => new PropInfo(p)).Where(p => p.Relevant).ToList();
+    foreach (var prop in RelevantProps) {
+      prop.UpdateDefaultValue(RelevantFields);
+    }
+
+    HasPostConstructor = thisClass.Members.OfType<EnvDTE80.CodeFunction2>().Any(m => IsPostConstructor(m));
   }
 
   private static bool IsPostConstructor(EnvDTE80.CodeFunction2 m) {
     return m.Name == "PostConstructor";
   }
 
-  private void ValidatePostConstructor(string fileName, EnvDTE80.CodeFunction2 m) {
+  private void ValidatePostConstructor(EnvDTE80.CodeFunction2 m) {
+    string fileName = CodeClass.ProjectItem.Name;
+
     if (m.Name != "PostConstructor") 
       throw new T4ImmutableException(fileName, FullName, "Immutable class PostConstructor() has a wrong name (internal error)");
 
@@ -85,7 +92,8 @@ public class ClassInfo {
       throw new T4ImmutableException(fileName, FullName, "Immutable class PostConstructor() must have no parameters");
   }
 
-  public void Validate(string fileName) {
+  public void Validate() {
+    string fileName = CodeClass.ProjectItem.Name;
     var thisClass = CodeClass;
     var partialClasses = VSH.CodeModel.GetPartialClasses(thisClass).Select(c => new ClassInfo(c)).ToList();
 
@@ -119,28 +127,29 @@ public class ClassInfo {
 
     if (HasPostConstructor) {
       foreach (var m in CodeClass.Members.OfType<EnvDTE80.CodeFunction2>().Where(m => IsPostConstructor(m))) {
-        ValidatePostConstructor(fileName, m);
+        ValidatePostConstructor(m);
       }
     }
 
     // validate each field
     foreach (var field in RelevantFields) {
-      field.Validate(fileName);
+      field.Validate();
     }
 
     // validate each property
     foreach (var prop in RelevantProps) {
-      prop.Validate(fileName);
+      prop.Validate();
     }
   }
 
   public void MarkAsPartial() {
+    string fileName = CodeClass.ProjectItem.Name;
     if (CodeClass.DataTypeKind != EnvDTE80.vsCMDataTypeKind.vsCMDataTypeKindPartial) {
       try {
         CodeClass.DataTypeKind = EnvDTE80.vsCMDataTypeKind.vsCMDataTypeKindPartial;
       }
       catch {
-        AddWarning("Unable to mark class " + FullName + " as partial. Please change it manually if possible");
+        AddWarning(fileName + " - Unable to mark class " + FullName + " as partial. Please change it manually if possible");
       }
     }
   }
