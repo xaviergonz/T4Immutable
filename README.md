@@ -91,7 +91,7 @@ public Person([NotNull] string firstName) {
 ## Constructor overrides
 If you need to do alternate constructors (for example having a Point\<T>(T x, T y) Immutable class and you want to generate a point from a distance and an angle) then you can do something like:
 ```c#
-public static Point\<T> FromAngleAndDistance(T distance, double angle) {
+public static Point<T> FromAngleAndDistance(T distance, double angle) {
   // your code here
   return new Point(x, y);
 }
