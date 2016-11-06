@@ -11,7 +11,7 @@ class Person {
 
   public string FirstName { get; }
   public string LastName { get; }
-  public ing Age { get; }
+  public int Age { get; }
   
   [ComputedProperty]
   public string FullName {
@@ -147,3 +147,95 @@ Why would you need one when you can set all parameters at once by using the cons
 
 ## Can I suggest new features or whatever?
 Please do!
+
+## Can I see the extra code generated for the very first example?
+Here you go:
+```c#
+using System;
+
+[System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+partial class Person : IEquatable<Person> {
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public Person(string firstName, string lastName, int age = 18) {
+    this.FirstName = firstName;
+    this.LastName = lastName;
+    this.Age = age;
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  private bool ImmutableEquals(Person obj) {
+    if (ReferenceEquals(this, obj)) return true;
+    if (ReferenceEquals(obj, null)) return false;
+    return T4Immutable.Helpers.AreEqual(this.FirstName, obj.FirstName) && T4Immutable.Helpers.AreEqual(this.LastName, obj.LastName) && T4Immutable.Helpers.AreEqual(this.Age, obj.Age);
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public override bool Equals(object obj) {
+    return ImmutableEquals(obj as Person);
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public bool Equals(Person obj) {
+    return ImmutableEquals(obj);
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public static bool operator ==(Person a, Person b) {
+    return T4Immutable.Helpers.AreEqual(a, b);
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public static bool operator !=(Person a, Person b) {
+    return !T4Immutable.Helpers.AreEqual(a, b);
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0")]
+  private int? _ImmutableHashCode;
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  private int ImmutableGetHashCode() {
+    if (_ImmutableHashCode == null) _ImmutableHashCode = new { this.FirstName, this.LastName, this.Age }.GetHashCode();
+    return _ImmutableHashCode.Value;
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public override int GetHashCode() {
+    return ImmutableGetHashCode();
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  private string ImmutableToString() {
+    var sb = new System.Text.StringBuilder();
+    sb.Append(nameof(Person) + " { ");
+    
+    var values = new string[] {
+      nameof(this.FirstName) + "=" + T4Immutable.Helpers.ToString(this.FirstName),
+      nameof(this.LastName) + "=" + T4Immutable.Helpers.ToString(this.LastName),
+      nameof(this.Age) + "=" + T4Immutable.Helpers.ToString(this.Age),
+    };
+    
+    sb.Append(string.Join(", ", values) + " }");
+    return sb.ToString();
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public override string ToString() {
+    return ImmutableToString();
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  private Person ImmutableWith(T4Immutable.WithParam<string> firstName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<string> lastName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<int> age = default(T4Immutable.WithParam<int>)) {
+    return new Person(
+      !firstName.HasValue ? this.FirstName : firstName.Value,
+      !lastName.HasValue ? this.LastName : lastName.Value,
+      !age.HasValue ? this.Age : age.Value
+    );
+  }
+  
+  [System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.0"), System.Diagnostics.DebuggerNonUserCode]
+  public Person With(T4Immutable.WithParam<string> firstName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<string> lastName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<int> age = default(T4Immutable.WithParam<int>)) {
+    return ImmutableWith(firstName, lastName, age);
+  }
+  
+}
+```
