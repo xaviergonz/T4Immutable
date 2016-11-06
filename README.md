@@ -18,7 +18,7 @@ class Person {
 
 It will automatically generate for you in a separate partial class file the following:
 * A constructor such as ```public Person(string firstName, string lastName, int age = 18)``` that will initialize the values.
-* Working implementations for ```Equals(object other)``` and ```Equals(Person other)```
+* Working implementations for ```Equals(object other)``` and ```Equals(Person other)```. Also it will add the ```IEquatable<Person>``` interface for you.
 * Working implementations for ```operator==``` and ```operator!=```
 * A working implementation of ```GetHashCode()```
 * A better ```ToString()``` with output such as ```"Person { FirstName=John, LastName=Doe, Age=21 }"```
@@ -38,7 +38,7 @@ Just use the ```[ImmutableClass]``` attribute over the class. The class will be 
 
 Besides those checks it is your responsibility to make the immutable object behave correctly. For example you should use ImmutableList instead of List and so on. This project is just made to reduce the boilerplate after all, not ensure correctness.
 
-## Can I control what gets generated?
+## I don't want X. Can I control what gets generated?
 You sure can, just add to the ImmutableClass attribute something like this:
 ```
 [ImmutableClass(Options = ImmutableClassDisableEquals | DisableGetHashCode | EnableOperatorEquals | DisableToString| DisableWith)]
@@ -110,6 +110,9 @@ There are plugins out there that auto-run T4 templates once code changes, but if
 
 ## Does Intellisense and all that stuff work after using this?
 Absolutely, since the generated files are .cs files Intellisense will pick the syntax without problems.
+
+# Why doesn't it generate a builder?
+Why would you need one when you can set all parameters at once by using the constructor or change as many parameters as you want at once with a single ```With(...)``` invocation? That being said, please let me know if you think otherwise.
 
 ## Can I suggest new features or whatever?
 Please do!
