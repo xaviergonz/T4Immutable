@@ -109,7 +109,7 @@ If you wonder why there are two alternatives it is because sometimes it is possi
 
 Please note that default values, like in a constructor, should not have gaps. This is, if you have int x, int y then you should have a default value for y or for x and y. If you want a default value for x then move it to the end.
 
-## Does it work with generic classes? Custom methods?
+## Does it work with generic classes? Custom methods? Nested classes?
 It sure does!
 
 ## How do I rebuild the auto-generated files once I make a change in my code?
