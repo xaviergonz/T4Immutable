@@ -77,18 +77,48 @@ public int Age {
 }
 ```
 
-## Are there any other nice tricks I should know about?
-About not null checking for ReSharper users here is a nice trick. Install the JetBrains.Annotations package from NuGet and then do something like:
+## Can I add extra attributes to each constructor parameter?
+Yes, use the following when defining a property:
 ```c#
-[NotNull]
+// T4Immutable.PreConstructorParam: [JetBrains.Annotations.NotNull]
 public string FirstName { get; }
 ```
+Bear in mind the comment must be ABOVE any attributes the property might use and that if you use it to specify attributes they must have the full name (including namespace) or else there would be compilation errors.
 
-Then the generated constructor will have this automatically for you:
+## How do I enforce automatic null checking for the constructor parameters? What about for the properties?
+If you use this:
 ```c#
-public Person([NotNull] string firstName) {
+[PreNotNullCheck, PostNotNullCheck]
+public string FirstName { get; }
+```
+The constructor will be this:
+```c#
+public Person(string firstName) {
+  // pre not null check
   if (firstName == null) throw new ArgumentNullException(nameof(firstName));
-  this.FirstName = firstName;
+  
+  // assignations + PostConstructor() if needed
+  
+  // post not null check
+  if (this.FirstName == null) throw new NullReferenceException(nameof(this.FirstName));
+}
+```
+
+Having said this, if you use JetBrains Annotations for null checking, you can also do this:
+```c#
+[JetBrains.Annotations.NotNull, ConstructorParamNotNull]
+public string FirstName { get; }
+```
+And the constructor will be this:
+```c#
+public Person([JetBrains.Annotations.NotNull] string firstName) {
+  // pre not null check is implied by ConstructorParamNotNull
+  if (firstName == null) throw new ArgumentNullException(nameof(firstName));
+  
+  // assignations + PostConstructor() if needed
+  
+  // post not null check implied by JetBrains.Annotations.NotNull on the property
+  if (this.FirstName == null) throw new NullReferenceException(nameof(this.FirstName));
 }
 ```
 
@@ -224,4 +254,5 @@ partial class Person : IEquatable<Person> {
   }
   
 }
+
 ```
