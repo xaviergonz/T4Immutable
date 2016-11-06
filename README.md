@@ -90,12 +90,17 @@ public static Point\<T> FromAngleAndDistance(T distance, double angle) {
 }
 ```
 
+## How do I change the order of the arguments in the generated constructor?
+Just change the order of the properties.
+
 ## How to specify property default values?
 If you want a property to have a given default value on the auto-generated constructor there are two ways. Say that you have a property named int Age, and you want it to have the default value of 18:
 * Way 1: ```(private/protected/public/whatever) const int AgeDefaultValue = 18;```
 * Way 2: ```(private/protected/public/whatever) static readonly int AgeDefaultValue = 18;```
 
 If you wonder why there are two alternatives it is because sometimes it is possible to add stuff such as ```new Foo()``` as a default parameter for constructors and that expression works as a readonly but does not work as a const.
+
+Please note that default values, like in a constructor, should not have gaps. This is, if you have int x, int y then you should have a default value for y or for x and y. If you want a default value for x then move it to the end.
 
 ## Does it work with generic classes? Custom methods?
 It sure does!
