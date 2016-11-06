@@ -78,8 +78,13 @@ public class ClassWriter {
     Lines.Add(str + line);
   }
 
-  public void WIGenerated(int indentation) {
-    WI(indentation, "[System.CodeDom.Compiler.GeneratedCode(\"T4Immutable\", \"1.0\"), System.Diagnostics.DebuggerNonUserCode]");
+  public void WIGenerated(int indentation, bool includeDebuggerNonUserCode = true) {
+    string str = "[System.CodeDom.Compiler.GeneratedCode(\"T4Immutable\", \"1.0\")";
+    if (includeDebuggerNonUserCode) {
+      str += ", System.Diagnostics.DebuggerNonUserCode";
+    }
+    str += "]";
+    WI(indentation, str);
   }
 
   public void Clear() {

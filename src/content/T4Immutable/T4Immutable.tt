@@ -289,10 +289,14 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
 
   // GetHashCode
   {
+    fw.WIGenerated(ind, false);
+    fw.WI(ind, "private int? _ImmutableHashCode;");
+    fw.WI(ind, "");
     fw.WIGenerated(ind);
     fw.WI(ind, "private int ImmutableGetHashCode() {");
     ind++;
-    fw.WI(ind, "return new { " + string.Join(", ", allProps.Select(p => "this." + p.Name)) + " }.GetHashCode();");
+    fw.WI(ind, "if (_ImmutableHashCode == null) _ImmutableHashCode = new { " + string.Join(", ", allProps.Select(p => "this." + p.Name)) + " }.GetHashCode();");
+    fw.WI(ind, "return _ImmutableHashCode.Value;");
     ind--;
     fw.WI(ind, "}");
     fw.WI(ind, "");
