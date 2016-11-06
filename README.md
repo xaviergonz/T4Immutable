@@ -116,6 +116,26 @@ Please note that default values, like in a constructor, should not have gaps. Th
 ## Does it work with generic classes? Custom methods? Nested classes?
 It sure does!
 
+## What if I want to make the class smarter though not strictly immutable, like caching a point distance after it has been requested the first time?
+This is more about reducing boilerplate than ensuring immutability, so you can. E.g.:
+```c#
+[ImmutableClass]
+class Point {
+  public double X { get; }
+  public double Y { get; }
+  
+  private double _Distance;
+  
+  [ComputedProperty]
+  public double Distance {
+    get {
+      if (_Distance == null) _Distance = Math.Sqrt(X*X + Y*Y);
+      return _Distance.Value;
+    }
+  }
+}
+```
+
 ## How do I rebuild the auto-generated files once I make a change in my code?
 There are plugins out there that auto-run T4 templates once code changes, but if you don't want/need one then just use ¨Build - Transform All T4 Templates¨.
 
