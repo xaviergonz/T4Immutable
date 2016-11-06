@@ -21,7 +21,7 @@ CustomCommentOptions[CustomCommentOptionDomain.Property] = new string[] {
 <#+
 // constants
 const string ToolName = "T4Immutable";
-const string ToolVersion = "1.0.5";
+const string ToolVersion = "1.0.6";
 const string CustomNamespace = "T4Immutable";
 
 const string CustomGeneratedCodeAttribute = CustomNamespace + ".GeneratedCodeAttribute";
