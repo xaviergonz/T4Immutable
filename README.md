@@ -214,7 +214,7 @@ partial class Person : IEquatable<Person> {
     return !T4Immutable.Helpers.AreEqual(a, b);
   }
   
-  private int _ImmutableHashCode;
+  private readonly int _ImmutableHashCode;
   
   private int ImmutableGetHashCode() {
     return _ImmutableHashCode;
