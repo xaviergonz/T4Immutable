@@ -13,7 +13,8 @@ TT = this;
 VSH = this.VisualStudioHelper;
 #>
 <#+
-const string GeneratedAttribute = "System.CodeDom.Compiler.GeneratedCodeAttribute";
+const string CompilerGeneratedAttribute = "System.CodeDom.Compiler.GeneratedCodeAttribute";
+const string CustomGeneratedAttribute = "T4Immutable.GeneratedCodeAttribute";
 
 static TextTransformation TT;
 static AutomationHelper VSH;
@@ -78,8 +79,11 @@ public class ClassWriter {
     Lines.Add(str + line);
   }
 
-  public void WIGenerated(int indentation, bool includeDebuggerNonUserCode = true) {
-    string str = "[System.CodeDom.Compiler.GeneratedCode(\"T4Immutable\", \"1.0\")";
+  public void WIGenerated(int indentation, bool includeDebuggerNonUserCode = true, bool includeCompilerGenerated = true) {
+    string str = "[T4Immutable.GeneratedCode";
+    if (includeCompilerGenerated) {
+      str += ", System.CodeDom.Compiler.GeneratedCode(\"T4Immutable\", \"1.0\")";
+    }
     if (includeDebuggerNonUserCode) {
       str += ", System.Diagnostics.DebuggerNonUserCode";
     }

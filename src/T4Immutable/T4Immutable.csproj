@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="ComputedPropertyAttribute.cs" />
     <Compile Include="ConstructorAccessLevel.cs" />
+    <Compile Include="GeneratedCodeAttribute.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="ImmutableClassAttribute.cs" />
     <Compile Include="ImmutableClassOptions.cs" />

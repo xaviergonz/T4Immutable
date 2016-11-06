@@ -186,6 +186,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   foreach (var p in parents) {
     var pClass = p as ClassInfo;
     var pStruct = p as StructInfo;
+    fw.WIGenerated(ind, false, false);
     if (pClass != null) {
       fw.WI(ind, "partial class " + pClass.Name + pClass.GenericString + " {");
     }

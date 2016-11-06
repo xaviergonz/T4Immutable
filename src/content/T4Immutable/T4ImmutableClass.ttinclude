@@ -49,8 +49,7 @@ public class ClassInfo {
     foreach (var prop in RelevantProps) {
       prop.UpdateDefaultValue(RelevantFields);
     }
-    Generated = FindAttribute(thisClass.Attributes, GeneratedAttribute) != null;
-    GenericString = ExtractGeneric(FullName);
+    Generated = FindAttribute(thisClass.Attributes, CustomGeneratedAttribute) != null;
 
     var parentClass = CodeClass.Parent as EnvDTE80.CodeClass2;
     var parentStruct = CodeClass.Parent as EnvDTE80.CodeStruct2;
@@ -58,6 +57,12 @@ public class ClassInfo {
     ParentStruct = parentStruct == null ? null : new StructInfo(parentStruct);
 
     HasPostConstructor = thisClass.Members.OfType<EnvDTE80.CodeFunction2>().Any(m => IsPostConstructor(m));
+
+    // fix for Foo<B>.Bar<C>
+    var strippedFullName = FullName;
+    if (ParentClass != null) strippedFullName = strippedFullName.Substring(ParentClass.FullName.Length + 1);
+    if (ParentStruct != null) strippedFullName = strippedFullName.Substring(ParentStruct.FullName.Length + 1);
+    GenericString = ExtractGeneric(strippedFullName);
   }
 
   private static bool IsPostConstructor(EnvDTE80.CodeFunction2 m) {

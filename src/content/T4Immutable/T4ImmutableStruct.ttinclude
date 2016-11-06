@@ -31,13 +31,18 @@ public class StructInfo {
   public StructInfo(CodeStruct thisStruct) {
     CodeStruct = (EnvDTE80.CodeStruct2)thisStruct;
 
-    Generated = FindAttribute(thisStruct.Attributes, GeneratedAttribute) != null;
-    GenericString = ExtractGeneric(FullName);
+    Generated = FindAttribute(thisStruct.Attributes, CustomGeneratedAttribute) != null;
 
     var parentClass = CodeStruct.Parent as EnvDTE80.CodeClass2;
     var parentStruct = CodeStruct.Parent as EnvDTE80.CodeStruct2;
     ParentClass = parentClass == null ? null : new ClassInfo(parentClass);
     ParentStruct = parentStruct == null ? null : new StructInfo(parentStruct);
+
+    // fix for Foo<B>.Bar<C>
+    var strippedFullName = FullName;
+    if (ParentClass != null) strippedFullName = strippedFullName.Substring(ParentClass.FullName.Length + 1);
+    if (ParentStruct != null) strippedFullName = strippedFullName.Substring(ParentStruct.FullName.Length + 1);
+    GenericString = ExtractGeneric(strippedFullName);
   }
 
   public void MarkAsPartial() {
