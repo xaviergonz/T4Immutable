@@ -234,6 +234,8 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
       fw.WI(ind, "if (ReferenceEquals(this." + p.Name + ", null)) throw new NullReferenceException(nameof(this." + p.Name + "));");
     }
 
+    fw.WI(ind, "_ImmutableHashCode = new { " + string.Join(", ", allProps.Select(p => "this." + p.Name)) + " }.GetHashCode();");
+
     ind--;
     fw.WI(ind, "}");
     fw.WI(ind, "");
@@ -297,13 +299,12 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   // GetHashCode
   {
     fw.WIGenerated(ind, false);
-    fw.WI(ind, "private int? _ImmutableHashCode;");
+    fw.WI(ind, "private int _ImmutableHashCode;");
     fw.WI(ind, "");
     fw.WIGenerated(ind);
     fw.WI(ind, "private int ImmutableGetHashCode() {");
     ind++;
-    fw.WI(ind, "if (_ImmutableHashCode == null) _ImmutableHashCode = new { " + string.Join(", ", allProps.Select(p => "this." + p.Name)) + " }.GetHashCode();");
-    fw.WI(ind, "return _ImmutableHashCode.Value;");
+    fw.WI(ind, "return _ImmutableHashCode;");
     ind--;
     fw.WI(ind, "}");
     fw.WI(ind, "");

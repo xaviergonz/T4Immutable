@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/xaviergonz/T4Immutable</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes. </description>
-    <releaseNotes>Added support for pre constructor parameter options and better non null handling.</releaseNotes>
+    <releaseNotes>Better and faster hash code generation.</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>t4 immutable codegen</tags>
   </metadata>
