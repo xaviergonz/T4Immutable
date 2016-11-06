@@ -189,6 +189,7 @@ partial class Person : IEquatable<Person> {
     this.FirstName = firstName;
     this.LastName = lastName;
     this.Age = age;
+    _ImmutableHashCode = new { this.FirstName, this.LastName, this.Age }.GetHashCode();
   }
   
   private bool ImmutableEquals(Person obj) {
@@ -213,11 +214,10 @@ partial class Person : IEquatable<Person> {
     return !T4Immutable.Helpers.AreEqual(a, b);
   }
   
-  private int? _ImmutableHashCode;
+  private int _ImmutableHashCode;
   
   private int ImmutableGetHashCode() {
-    if (_ImmutableHashCode == null) _ImmutableHashCode = new { this.FirstName, this.LastName, this.Age }.GetHashCode();
-    return _ImmutableHashCode.Value;
+    return _ImmutableHashCode;
   }
   
   public override int GetHashCode() {
