@@ -165,6 +165,7 @@ class Point {
   }
 }
 ```
+However if you do stuff like this, then since internally it has become mutable-ish you will need to use a lock or some other method if you want it to work properly when the object is used concurrently. A probably better solution would be to initialize the ```_Distance``` member inside the ```PostConstructor()```. It all depends on your use case.
 
 ## How do I rebuild the auto-generated files once I make a change in my code?
 There are plugins out there that auto-run T4 templates once code changes, but if you don't want/need one then just use ¨Build - Transform All T4 Templates¨.
