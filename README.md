@@ -111,7 +111,7 @@ There are plugins out there that auto-run T4 templates once code changes, but if
 ## Does Intellisense and all that stuff work after using this?
 Absolutely, since the generated files are .cs files Intellisense will pick the syntax without problems.
 
-# Why doesn't it generate a builder?
+## Why doesn't it generate a builder?
 Why would you need one when you can set all parameters at once by using the constructor or change as many parameters as you want at once with a single ```With(...)``` invocation? That being said, please let me know if you think otherwise.
 
 ## Can I suggest new features or whatever?
