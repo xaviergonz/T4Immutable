@@ -43,7 +43,12 @@ Besides those checks it is your responsibility to make the immutable object beha
 ## I don't want X. Can I control what gets generated?
 You sure can, just add to the ImmutableClass attribute something like this:
 ```
-[ImmutableClass(Options = ImmutableClassDisableEquals | DisableGetHashCode | EnableOperatorEquals | DisableToString| DisableWith)]
+[ImmutableClass(Options = 
+  ImmutableClassOptions.DisableEquals | 
+  ImmutableClassOptions.DisableGetHashCode | 
+  ImmutableClassOptions.EnableOperatorEquals | 
+  ImmutableClassOptions.DisableToString | 
+  ImmutableClassOptions.DisableWith)]
 ```
 The names should be pretty explanatory. Note that even if you disable for example the Equals implementation you can still use them internally by invoking the ```private bool ImmutableEquals(...)``` implementation. This is done in case you might want to write your own ```Equals(...)``` yet still use the generated one as a base.
 
