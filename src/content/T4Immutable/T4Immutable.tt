@@ -299,7 +299,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   // GetHashCode
   {
     fw.WIGenerated(ind, false);
-    fw.WI(ind, "private int _ImmutableHashCode;");
+    fw.WI(ind, "private readonly int _ImmutableHashCode;");
     fw.WI(ind, "");
     fw.WIGenerated(ind);
     fw.WI(ind, "private int ImmutableGetHashCode() {");
