@@ -11,17 +11,11 @@
 <#
 TT = this;
 VSH = this.VisualStudioHelper;
-
-CustomCommentOptions[CustomCommentOptionDomain.Class] = new string[] {
-};
-CustomCommentOptions[CustomCommentOptionDomain.Property] = new string[] {
-  CustomPreConstructorParamCommentOption
-};
 #>
 <#+
 // constants
 const string ToolName = "T4Immutable";
-const string ToolVersion = "1.0.8";
+const string ToolVersion = "1.1.0";
 const string CustomNamespace = "T4Immutable";
 
 const string CustomGeneratedCodeAttribute = CustomNamespace + ".GeneratedCodeAttribute";
@@ -31,6 +25,7 @@ const string CustomPostNotNullCheckAttribute = CustomNamespace + ".PostNotNullCh
 const string CustomPreNotNullCheckAttribute = CustomNamespace + ".PreNotNullCheckAttribute";
 const string CustomConstructorParamNotNullAttribute = CustomNamespace + ".ConstructorParamNotNullAttribute";
 const string CustomImmutableComputedPropertyAttribute = CustomNamespace + ".ComputedPropertyAttribute";
+const string CustomPreConstructorParamAttribute = CustomNamespace + ".PreConstructorParamAttribute";
 
 // class attributes
 const string CustomImmutableClassAttribute = CustomNamespace + ".ImmutableClassAttribute";
@@ -40,14 +35,6 @@ const string CompilerGeneratedCodeAttribute = "System.CodeDom.Compiler.Generated
 const string JetBrainsNotNullAttribute = "JetBrains.Annotations.NotNullAttribute";
 const string DebuggerNonUserCodeAttribute = "System.Diagnostics.DebuggerNonUserCodeAttribute";
 
-// comment options
-enum CustomCommentOptionDomain {
-  Class,
-  Property
-}
-const string CustomPreConstructorParamCommentOption = CustomNamespace + ".PreConstructorParam";
-
-static readonly Dictionary<CustomCommentOptionDomain, string[]> CustomCommentOptions = new Dictionary<CustomCommentOptionDomain, string[]>();
 static TextTransformation TT;
 static AutomationHelper VSH;
 
@@ -61,35 +48,6 @@ static void AddError(string str) {
 
 static CodeAttribute FindAttribute(CodeElements attribs, string fullName) {
   return attribs.OfType<CodeAttribute>().FirstOrDefault(att => att.FullName == fullName);
-}
-
-static Dictionary<string, string> ParseCommentOptions(string fileName, string itemName, string comment, CustomCommentOptionDomain domain) {
-  const string keyValueSep = ":";
-  var dict = new Dictionary<string, string>();
-  if (!string.IsNullOrWhiteSpace(comment)) {
-    var lines = comment.Split(new string[] {"\r", "\n"}, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
-    foreach (var line in lines) {
-      // get option name
-      var sepIndex = line.IndexOf(keyValueSep);
-      if (sepIndex < 0) continue;
-      
-      var optionName = line.Substring(0, sepIndex).Trim();
-      if (string.IsNullOrWhiteSpace(optionName)) continue;
-      if (!optionName.StartsWith(CustomNamespace + ".")) continue;
-
-      if (dict.ContainsKey(optionName)) {
-        AddWarning(fileName + " - " + itemName + " - Comment option \"" + optionName + "\" duplicated");
-      }
-
-      if (!CustomCommentOptions[domain].Any(o => o == optionName)) {
-        AddWarning(fileName + " - " + itemName + " - Comment option \"" + optionName + "\" is unknown for domain " + domain);
-        continue;
-      }
-
-      dict[optionName] = line.Substring(sepIndex + 1).Trim();
-    }
-  }
-  return dict;
 }
 
 static string ToCamelCase(string theString) {
@@ -128,7 +86,7 @@ static string RemoveAttributeTail(string attr) {
 }
 
 public class T4ImmutableException : Exception {
-  public T4ImmutableException(string fileName, string itemName, string msg) : base(fileName + " - " + itemName + " - " + msg) {
+  public T4ImmutableException(string fileName, string itemName, string msg) : base("[" + fileName + "] " + itemName + " - " + msg) {
   }
 }
 

@@ -2,11 +2,12 @@
 <#@ output extension=".log" #>
 <#@ include file=".\VisualStudioHelper.ttinclude" #>
 <#@ include file=".\TemplateFileManagerV2.1.ttinclude" #>
-<#@ include file=".\T4ImmutableGlobals.ttinclude" #>
-<#@ include file=".\T4ImmutableField.ttinclude" #>
-<#@ include file=".\T4ImmutableProp.ttinclude" #>
-<#@ include file=".\T4ImmutableStruct.ttinclude" #>
-<#@ include file=".\T4ImmutableClass.ttinclude" #>
+<#@ include file=".\Shared.ttinclude" #>
+<#@ include file=".\Parser.ttinclude" #>
+<#@ include file=".\Field.ttinclude" #>
+<#@ include file=".\Prop.ttinclude" #>
+<#@ include file=".\Struct.ttinclude" #>
+<#@ include file=".\Class.ttinclude" #>
 <#@ assembly Name="System.Core" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="EnvDTE80" #>
@@ -26,7 +27,12 @@ var manager = TemplateFileManager.Create(this);
 //manager.IsAutoIndentEnabled = true; // this makes generation unreliable (and slower) when set to true
 manager.CanOverrideExistingFile = true;
 var outFileNamesUsed = new HashSet<string>();
- 
+
+// init the parser
+var curProject = VSH.CurrentProject;
+var curProjectDir = System.IO.Path.GetDirectoryName(curProject.FullName);
+Parser.ReadAttributesCs(curProjectDir);
+
 var allProjectItems = VSH.GetAllProjectItems();
 foreach (ProjectItem pitem in allProjectItems) {
   var fileName = pitem.Name;
@@ -93,7 +99,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
 
   int ind = 0;
 
-  info.Validate();
+  info.ProcessAndValidate();
   var allProps = info.RelevantProps;
 
   // make our partial class with all the boilerplate
@@ -108,44 +114,69 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   // disable certain features depending on the attrib props
   foreach(var arg in info.ImmutableAttribute.Arguments.OfType<EnvDTE80.CodeAttributeArgument>()) {
     var val = arg.Value.Trim();
-    if (arg.Name == "Options") {
-      var options = val.Split(new char[] { ' ', '|', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+    const string optionsArg = "Options";
+    const string constructorAccessLevelArg = "ConstructorAccessLevel";
+
+    if (arg.Name == optionsArg) {
+      object parsed;
+      try {
+        parsed = Parser.ParseLiteral<object>(CustomNamespace + ".ImmutableClassOptions", val);
+      }
+      catch(ParserException ex) {
+        throw new T4ImmutableException(fileName, info.FullName, ex.Message);
+      }
+
+      var options = Parser.SplitEnumFields(parsed);
       foreach (var option in options) {
-        if (option.EndsWith(".DisableEquals")) {
-          enableEquals = false;
-        }
-        else if (option.EndsWith(".DisableGetHashCode")) {
-          enableGetHashCode = false;
-        }
-        else if (option.EndsWith(".EnableOperatorEquals")) {
-          enableOperatorEquals = true;
-        }
-        else if (option.EndsWith(".DisableToString")) {
-          enableToString = false;
-        }
-        else if (option.EndsWith(".DisableWith")) {
-          enableWith = false;
+        switch(option) {
+          case "ExcludeEquals":
+            enableEquals = false;
+            break;
+          case "ExcludeGetHashCode":
+            enableGetHashCode = false;
+            break;
+          case "IncludeOperatorEquals":
+            enableOperatorEquals = true;
+            break;
+          case "ExcludeToString":
+            enableToString = false;
+            break;
+          case "ExcludeWith":
+            enableWith = false;
+            break;
+          default:
+            throw new T4ImmutableException(fileName, info.FullName, "Error parsing " + optionsArg + " argument of ImmutableClassAttribute");
         }
       }
     }
-    else if (arg.Name == "ConstructorAccessLevel") {
-      if (val.EndsWith(".Public")) {
-        constructorAccessLevel = "public";
+    else if (arg.Name == constructorAccessLevelArg) {
+      object parsed;
+      try {
+        parsed = Parser.ParseLiteral<object>(CustomNamespace + ".ConstructorAccessLevel", val);
       }
-      else if (val.EndsWith(".Protected")) {
-        constructorAccessLevel = "protected";
+      catch(ParserException ex) {
+        throw new T4ImmutableException(fileName, info.FullName, ex.Message);
       }
-      else if (val.EndsWith(".Internal")) {
-        constructorAccessLevel = "internal";
-      }
-      else if (val.EndsWith(".Private")) {
-        constructorAccessLevel = "private";
-      }
-      else if (val.EndsWith(".ProtectedInternal")) {
-        constructorAccessLevel = "protected internal";
-      }
-      else {
-        throw new T4ImmutableException(fileName, info.FullName, "Error parsing ConstructorAccessLevel argument of ImmutableClassAttribute");
+
+      switch(parsed.ToString()) {
+        case "Public":
+          constructorAccessLevel = "public";
+          break;
+        case "Protected":
+          constructorAccessLevel = "protected";
+          break;
+        case "Internal":
+          constructorAccessLevel = "internal";
+          break;
+        case "Private":
+          constructorAccessLevel = "private";
+          break;
+        case "ProtectedInternal":
+          constructorAccessLevel = "protected internal";
+          break;
+        default:
+          throw new T4ImmutableException(fileName, info.FullName, "Error parsing " + constructorAccessLevelArg + " argument of ImmutableClassAttribute");
       }
     }
   }

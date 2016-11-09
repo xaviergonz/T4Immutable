@@ -35,15 +35,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComputedPropertyAttribute.cs" />
-    <Compile Include="ConstructorAccessLevel.cs" />
-    <Compile Include="ConstructorParamNotNullAttribute.cs" />
-    <Compile Include="GeneratedCodeAttribute.cs" />
+    <Compile Include="Attributes.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="ImmutableClassAttribute.cs" />
-    <Compile Include="ImmutableClassOptions.cs" />
-    <Compile Include="PostNotNullCheckAttribute.cs" />
-    <Compile Include="PreNotNullCheckAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WithParam.cs" />
   </ItemGroup>
@@ -55,6 +48,12 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo Copying Attributes.cs to content folder
+cd $(ProjectDir)
+copy Attributes.cs ..\content\T4Immutable\Attributes.cs_
+cd $(TargetDir)</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -13,19 +13,10 @@ public class ClassInfo {
   public EnvDTE80.CodeClass2 CodeClass { get; }
   public EnvDTE80.CodeAttribute2 ImmutableAttribute { get; }
   public bool Immutable { get { return ImmutableAttribute != null; } }
-  public List<PropInfo> RelevantProps { get; }
-  public List<FieldInfo> RelevantFields { get; }
   public bool Generated { get; }
-  public bool HasPostConstructor { get; }
   public ClassInfo ParentClass { get; }
   public StructInfo ParentStruct { get; }
 
-  public bool ShouldBeProcessed {
-    get {
-      return Immutable && !Generated;
-    }
-  }
-  
   public string Name { get { return CodeClass.Name; } } 
   public string FullName { get { return  CodeClass.FullName; } }
   public EnvDTE.CodeNamespace CodeNamespace { get { return CodeClass.Namespace; } } 
@@ -38,6 +29,14 @@ public class ClassInfo {
   }
 
   public string TypeString { get { return "class"; } }
+
+  public bool ShouldBeProcessed { get { return Immutable && !Generated; } }
+  
+  // these are evaluated after processing
+  public List<FieldInfo> RelevantFields { get; private set; }
+  public List<PropInfo> RelevantProps { get; private set; }
+  public bool HasPostConstructor { get; private set; }
+
 
   public ClassInfo(CodeClass thisClass) {
     CodeClass = (EnvDTE80.CodeClass2)thisClass;
@@ -55,19 +54,6 @@ public class ClassInfo {
     if (ParentClass != null) strippedFullName = strippedFullName.Substring(ParentClass.FullName.Length + 1);
     if (ParentStruct != null) strippedFullName = strippedFullName.Substring(ParentStruct.FullName.Length + 1);
     GenericString = ExtractGeneric(strippedFullName);
-
-    // speed up, do not process stuff we don't need
-    if (!ShouldBeProcessed) {
-      return;
-    }
-
-    RelevantFields = thisClass.Members.OfType<CodeVariable>().Select(p => new FieldInfo(p)).Where(p => p.Relevant).ToList();
-    RelevantProps = thisClass.Members.OfType<CodeProperty>().Select(p => new PropInfo(p)).Where(p => p.Relevant).ToList();
-    foreach (var prop in RelevantProps) {
-      prop.UpdateDefaultValue(RelevantFields);
-    }
-
-    HasPostConstructor = thisClass.Members.OfType<EnvDTE80.CodeFunction2>().Any(m => IsPostConstructor(m));
   }
 
   private static bool IsPostConstructor(EnvDTE80.CodeFunction2 m) {
@@ -92,13 +78,27 @@ public class ClassInfo {
       throw new T4ImmutableException(fileName, FullName, "Immutable class PostConstructor() must have no parameters");
   }
 
-  public void Validate() {
+  public void ProcessAndValidate() {
     string fileName = CodeClass.ProjectItem.Name;
-    var thisClass = CodeClass;
-    var partialClasses = VSH.CodeModel.GetPartialClasses(thisClass).Select(c => new ClassInfo(c)).ToList();
+
+    if (!ShouldBeProcessed) {
+      throw new T4ImmutableException(fileName, FullName, "Unrelevant immutable class (internal error)");
+    }
+
+    // process
+    RelevantFields = CodeClass.Members.OfType<CodeVariable>().Select(p => new FieldInfo(p)).Where(p => p.Relevant).ToList();
+    RelevantProps = CodeClass.Members.OfType<CodeProperty>().Select(p => new PropInfo(p)).Where(p => p.Relevant).ToList();
+    foreach (var prop in RelevantProps) {
+      prop.UpdateDefaultValue(RelevantFields);
+    }
+
+    HasPostConstructor = CodeClass.Members.OfType<EnvDTE80.CodeFunction2>().Any(m => IsPostConstructor(m));
+
+    // validation
+    var partialClasses = VSH.CodeModel.GetPartialClasses(CodeClass).Select(c => new ClassInfo(c)).ToList();
 
     // do not support static classes
-    if (thisClass.IsShared) {
+    if (CodeClass.IsShared) {
       throw new T4ImmutableException(fileName, FullName, "Immutable classes cannot be static");
     }
 
@@ -119,7 +119,7 @@ public class ClassInfo {
     }
 
     // no constructors allowed
-    var memberFuncs = thisClass.Members.OfType<CodeFunction>().ToList();
+    var memberFuncs = CodeClass.Members.OfType<CodeFunction>().ToList();
     var constructors = memberFuncs.Where(m => m.FunctionKind == vsCMFunction.vsCMFunctionConstructor).ToList();
     if (constructors.Count > 0) {
       throw new T4ImmutableException(fileName, FullName, "Immutable classes cannot have constructors (but for generated ones)");
@@ -136,9 +136,9 @@ public class ClassInfo {
       field.Validate();
     }
 
-    // validate each property
+    // process and validate each property
     foreach (var prop in RelevantProps) {
-      prop.Validate();
+      prop.ProcessAndValidate();
     }
   }
 

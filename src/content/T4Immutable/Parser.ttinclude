@@ -1,0 +1,105 @@
+﻿<#@ assembly Name="System.Core" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#
+CustomCommentOptions[CustomCommentOptionDomain.Class] = new string[] {
+};
+
+CustomCommentOptions[CustomCommentOptionDomain.Property] = new string[] {
+};
+#>
+<#+
+public class ParserException : Exception {
+  public ParserException(string msg) : base(msg) {
+  }
+}
+
+public static class Parser {
+  private static string _AttributesCs = null;
+
+  public static void ReadAttributesCs(string projPath) {
+    // read the file contents
+    _AttributesCs = File.ReadAllText(Path.Combine(projPath, "T4Immutable", "Attributes.cs_"));
+  }
+
+  public static string[] SplitEnumFields(object e) {
+    return e.ToString().Split(new char[] { ' ', ',', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+  }
+
+  public static T ParseLiteral<T>(string type, string value)
+  {
+    if (_AttributesCs == null) {
+      throw new Exception("Attributes.cs_ should be read before parsing is allowed");
+    }
+
+    using (var provider = System.CodeDom.Compiler.CodeDomProvider.CreateProvider("CSharp", new Dictionary<string, string>() { { "CompilerVersion", "v4.0" } })) {
+      var cp = new System.CodeDom.Compiler.CompilerParameters {
+        GenerateExecutable = false,
+        GenerateInMemory = true,
+        IncludeDebugInformation = true
+      };
+
+      var src = "using " + CustomNamespace + ";\n" + _AttributesCs + string.Format(
+        "\nnamespace T4ImmutableGenerated {{ public static class FromLiteral {{ public static {0} Convert() {{ return {1}; }}  }} }}",
+        type, value);
+
+      var results = provider.CompileAssemblyFromSource(cp, new string[] { src });
+
+      if (results.Errors.HasErrors) {
+        var errList = new System.CodeDom.Compiler.CompilerError[results.Errors.Count];
+        results.Errors.CopyTo(errList, 0);
+        throw new ParserException(
+          string.Format("Error parsing value '{0}' of type '{1}' - ", value, type)
+          + string.Join("; ", errList.Where(p => !p.IsWarning).Select(p => p.ErrorText)));
+      }
+
+      var asm = results.CompiledAssembly;
+      var asmType = asm.ExportedTypes.First(t => t.FullName == "T4ImmutableGenerated.FromLiteral");
+      var mi = asmType.GetMethod("Convert");
+      return (T)mi.Invoke(null, null);
+    }
+  }
+}
+
+// comment options
+enum CustomCommentOptionDomain {
+  Class,
+  Property
+}
+
+static readonly Dictionary<CustomCommentOptionDomain, string[]> CustomCommentOptions = new Dictionary<CustomCommentOptionDomain, string[]>();
+
+static Dictionary<string, string> ParseCommentOptions(string fileName, string itemName, string comment, CustomCommentOptionDomain domain) {
+  const string keyValueSep = ":";
+  var dict = new Dictionary<string, string>();
+  if (!string.IsNullOrWhiteSpace(comment)) {
+    var lines = comment.Split(new string[] {"\r", "\n"}, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+    foreach (var line in lines) {
+      // get option name
+      var sepIndex = line.IndexOf(keyValueSep);
+      if (sepIndex < 0) continue;
+      
+      var optionName = line.Substring(0, sepIndex).Trim();
+      if (string.IsNullOrWhiteSpace(optionName)) continue;
+      if (!optionName.StartsWith(CustomNamespace + ".")) continue;
+
+      if (dict.ContainsKey(optionName)) {
+        AddWarning(fileName + " - " + itemName + " - Comment option \"" + optionName + "\" duplicated");
+      }
+
+      if (!CustomCommentOptions[domain].Any(o => o == optionName)) {
+        AddWarning(fileName + " - " + itemName + " - Comment option \"" + optionName + "\" is unknown for domain " + domain);
+        continue;
+      }
+
+      dict[optionName] = line.Substring(sepIndex + 1).Trim();
+    }
+  }
+  return dict;
+}
+
+#>

@@ -9,12 +9,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{9B18
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4Immutable", "T4Immutable", "{1CC7F4B4-E394-495B-90BD-5B1C6420CC90}"
 	ProjectSection(SolutionItems) = preProject
+		content\T4Immutable\Attributes.cs_ = content\T4Immutable\Attributes.cs_
+		content\T4Immutable\Class.ttinclude = content\T4Immutable\Class.ttinclude
+		content\T4Immutable\Field.ttinclude = content\T4Immutable\Field.ttinclude
+		content\T4Immutable\Prop.ttinclude = content\T4Immutable\Prop.ttinclude
+		content\T4Immutable\Shared.ttinclude = content\T4Immutable\Shared.ttinclude
+		content\T4Immutable\Struct.ttinclude = content\T4Immutable\Struct.ttinclude
 		content\T4Immutable\T4Immutable.tt = content\T4Immutable\T4Immutable.tt
-		content\T4Immutable\T4ImmutableClass.ttinclude = content\T4Immutable\T4ImmutableClass.ttinclude
-		content\T4Immutable\T4ImmutableField.ttinclude = content\T4Immutable\T4ImmutableField.ttinclude
-		content\T4Immutable\T4ImmutableGlobals.ttinclude = content\T4Immutable\T4ImmutableGlobals.ttinclude
-		content\T4Immutable\T4ImmutableProp.ttinclude = content\T4Immutable\T4ImmutableProp.ttinclude
-		content\T4Immutable\T4ImmutableStruct.ttinclude = content\T4Immutable\T4ImmutableStruct.ttinclude
 		content\T4Immutable\TemplateFileManagerV2.1.ttinclude = content\T4Immutable\TemplateFileManagerV2.1.ttinclude
 		content\T4Immutable\VisualStudioHelper.ttinclude = content\T4Immutable\VisualStudioHelper.ttinclude
 	EndProjectSection

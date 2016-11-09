@@ -17,19 +17,17 @@ public class PropInfo {
   public CodeFunction Setter { get { return CodeProperty.Setter; } }
   public bool Computed { get; }
   public bool JetBrainsNotNull { get; }
-  public bool ConstructorParamNotNull { get; }
-  public bool PreNotNullCheck { get; }
-  public bool PostNotNullCheck { get; }
   public string TypeString { get; }
   public string ParamName { get; }
-  public string PreConstructorParamString { get; }
   public FieldInfo DefaultValue { get; private set; }
 
-  public bool Relevant {
-    get {
-      return !Computed;
-    }
-  }
+  public bool Relevant { get { return !Computed; } }
+
+  // these are evaluated after processing
+  public bool ConstructorParamNotNull { get; private set; }
+  public bool PreNotNullCheck { get; private set; }
+  public bool PostNotNullCheck { get; private set; }
+  public string PreConstructorParamString { get; private set; }
 
   public PropInfo(CodeProperty prop) {
     CodeProperty = (EnvDTE80.CodeProperty2)prop;
@@ -40,19 +38,6 @@ public class PropInfo {
 
     JetBrainsNotNull = FindAttribute(prop.Attributes, JetBrainsNotNullAttribute) != null;
     PostNotNullCheck = JetBrainsNotNull || FindAttribute(prop.Attributes, CustomPostNotNullCheckAttribute) != null;
-
-    // speed up, do not process stuff we don't need
-    if (!Relevant) {
-      return;
-    }
-
-    ConstructorParamNotNull = FindAttribute(prop.Attributes, CustomConstructorParamNotNullAttribute) != null;
-    PreNotNullCheck = ConstructorParamNotNull || FindAttribute(prop.Attributes, CustomPreNotNullCheckAttribute) != null;
-    
-    var commentOptions = ParseCommentOptions(CodeProperty.ProjectItem.Name, FullName, CodeProperty.Comment, CustomCommentOptionDomain.Property);
-    if (commentOptions.ContainsKey(CustomPreConstructorParamCommentOption)) {
-      PreConstructorParamString = commentOptions[CustomPreConstructorParamCommentOption];
-    }
   }
 
   public string ToFullParam(bool includeNotNull, bool includeAssign, bool includePre) {
@@ -78,13 +63,33 @@ public class PropInfo {
     DefaultValue = fields.FirstOrDefault(f => f.Name == Name + "DefaultValue");
   }
 
-  public void Validate() {
+  public void ProcessAndValidate() {
     string fileName = CodeProperty.ProjectItem.Name;
 
     if (!Relevant) {
       throw new T4ImmutableException(fileName, FullName, "Unrelevant immutable property (internal error)");
     }
 
+    // process
+    ConstructorParamNotNull = FindAttribute(CodeProperty.Attributes, CustomConstructorParamNotNullAttribute) != null;
+    PreNotNullCheck = ConstructorParamNotNull || FindAttribute(CodeProperty.Attributes, CustomPreNotNullCheckAttribute) != null;
+    
+    var preAttrib = FindAttribute(CodeProperty.Attributes, CustomPreConstructorParamAttribute);
+    if (preAttrib != null) {
+      var val = preAttrib.Value.Trim();
+      string parsed;
+      try {
+        parsed = Parser.ParseLiteral<string>("string", val);
+      }
+      catch(ParserException ex) {
+        throw new T4ImmutableException(fileName, FullName, CustomPreConstructorParamAttribute + " - " + ex.Message);
+      }
+
+      if (parsed == null) throw new T4ImmutableException(fileName, FullName, CustomPreConstructorParamAttribute + " - Argument cannot be null");
+      PreConstructorParamString = parsed;
+    }
+
+    // validation
     // make sure the default value (if any) type matches
     if (DefaultValue != null) {
       if (DefaultValue.TypeString != TypeString) {
