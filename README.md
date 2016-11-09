@@ -3,6 +3,10 @@
 
 T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
 
+## v1.1.0
+* ImmutableClassOptions.EnableXXX/DisableXXX have been renamed to ImmutableClassOptions.IncludeXXX/ExcludeXXX
+* preConstructorParam code comment has been changed to the PreConstructorParam attribute
+
 Creating proper immutable objects in C# requires a lot boilerplate code. The aim of this project is to reduce this to a minimum by means of automatic code generation via T4 templates. For instance, given the following class:
 ```c#
 [ImmutableClass(Options = ImmutableClassOptions.IncludeOperatorEquals)]
