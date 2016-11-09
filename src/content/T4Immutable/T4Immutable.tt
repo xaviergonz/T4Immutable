@@ -265,7 +265,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
       fw.WI(ind, "if (ReferenceEquals(this." + p.Name + ", null)) throw new NullReferenceException(nameof(this." + p.Name + "));");
     }
 
-    fw.WI(ind, "_ImmutableHashCode = new { " + string.Join(", ", allProps.Select(p => "this." + p.Name)) + " }.GetHashCode();");
+    fw.WI(ind, "_ImmutableHashCode = T4Immutable.Helpers.GetHashCodeFor(" + string.Join(", ", allProps.Select(p => "this." + p.Name)) + ");");
 
     ind--;
     fw.WI(ind, "}");
@@ -356,19 +356,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
     fw.WIGenerated(ind);
     fw.WI(ind, "private string ImmutableToString() {");
     ind++;
-    fw.WI(ind, "var sb = new System.Text.StringBuilder();");
-    fw.WI(ind, "sb.Append(nameof(" + info.Name + info.GenericString + ") + \" { \");");
-    fw.WI(ind, "");
-    fw.WI(ind, "var values = new string[] {");
-    ind++;
-    foreach (var prop in allProps) {
-      fw.WI(ind, "nameof(this." + prop.Name + ") + \"=\" + T4Immutable.Helpers.ToString(this." + prop.Name + "),");
-    }
-    ind--;
-    fw.WI(ind, "};");
-    fw.WI(ind, "");
-    fw.WI(ind, "sb.Append(string.Join(\", \", values) + \" }\");");
-    fw.WI(ind, "return sb.ToString();");
+    fw.WI(ind, "return T4Immutable.Helpers.ToStringFor(nameof(" + info.Name + info.GenericString + "), " + string.Join(", ", allProps.Select(p => "new System.Tuple<string, object>(nameof(this." + p.Name + "), this." + p.Name + ")")) + ");") ;
     ind--;
     fw.WI(ind, "}");
     fw.WI(ind, "");
