@@ -3,6 +3,9 @@
 
 T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
 
+#### v1.1.1 release notes
+* Generated Equals, GetHashCode and ToString now properly support collections as long as they implement IEnumerator. This means that arrays, List, Set, Dictionary, plus its Immutable variants are properly handled.
+
 #### v1.1.0 release notes
 * ImmutableClassOptions.EnableXXX/DisableXXX have been renamed to ImmutableClassOptions.IncludeXXX/ExcludeXXX
 * preConstructorParam code comment has been changed to the PreConstructorParam attribute
@@ -191,11 +194,12 @@ Here you go (excluding some redundant attributes):
 using System;
 
 partial class Person : IEquatable<Person> {
+  [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.1.1"), System.Diagnostics.DebuggerNonUserCode]
   public Person(string firstName, string lastName, int age = 18) {
     this.FirstName = firstName;
     this.LastName = lastName;
     this.Age = age;
-    _ImmutableHashCode = new { this.FirstName, this.LastName, this.Age }.GetHashCode();
+    _ImmutableHashCode = T4Immutable.Helpers.GetHashCodeFor(this.FirstName, this.LastName, this.Age);
   }
   
   private bool ImmutableEquals(Person obj) {
@@ -231,17 +235,7 @@ partial class Person : IEquatable<Person> {
   }
   
   private string ImmutableToString() {
-    var sb = new System.Text.StringBuilder();
-    sb.Append(nameof(Person) + " { ");
-    
-    var values = new string[] {
-      nameof(this.FirstName) + "=" + T4Immutable.Helpers.ToString(this.FirstName),
-      nameof(this.LastName) + "=" + T4Immutable.Helpers.ToString(this.LastName),
-      nameof(this.Age) + "=" + T4Immutable.Helpers.ToString(this.Age),
-    };
-    
-    sb.Append(string.Join(", ", values) + " }");
-    return sb.ToString();
+    return T4Immutable.Helpers.ToStringFor(nameof(Person), new System.Tuple<string, object>(nameof(this.FirstName), this.FirstName), new System.Tuple<string, object>(nameof(this.LastName), this.LastName), new System.Tuple<string, object>(nameof(this.Age), this.Age));
   }
   
   public override string ToString() {
