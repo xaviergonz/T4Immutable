@@ -5,7 +5,7 @@ T4Immutable is a T4 template for C# .NET apps that generates code for immutable 
 
 Creating proper immutable objects in C# requires a lot boilerplate code. The aim of this project is to reduce this to a minimum by means of automatic code generation via T4 templates. For instance, given the following class:
 ```c#
-[ImmutableClass(Options = ImmutableClassOptions.EnableOperatorEquals)]
+[ImmutableClass(Options = ImmutableClassOptions.IncludeOperatorEquals)]
 class Person {
   private const int AgeDefaultValue = 18;
 
@@ -48,13 +48,14 @@ Besides those checks it is your responsibility to make the immutable object beha
 You sure can, just add to the ImmutableClass attribute something like this:
 ```
 [ImmutableClass(Options = 
-  ImmutableClassOptions.DisableEquals | 
-  ImmutableClassOptions.DisableGetHashCode | 
-  ImmutableClassOptions.EnableOperatorEquals | 
-  ImmutableClassOptions.DisableToString | 
-  ImmutableClassOptions.DisableWith)]
+  ImmutableClassOptions.ExcludeEquals | 
+  ImmutableClassOptions.ExcludeGetHashCode | 
+  ImmutableClassOptions.IncludeOperatorEquals | 
+  ImmutableClassOptions.ExcludeToString | 
+  ImmutableClassOptions.ExcludeWith)]
 ```
-The names should be pretty explanatory. Note that even if you disable for example the Equals implementation you can still use them internally by invoking the ```private bool ImmutableEquals(...)``` implementation. This is done in case you might want to write your own ```Equals(...)``` yet still use the generated one as a base.
+The names should be pretty self explanatory. Note that even if you exclude for example the Equals implementation you can still use them internally by invoking the ```private bool ImmutableEquals(...)``` implementation. This is done in case you might want to write your own ```Equals(...)``` yet still use the generated one as a base.
+Take care in not using "using Foo = ImmutableClassOptions" to save some typing, it won't work.
 
 ## Can I control the access level (public/private/...) of the constructor?
 Yes. Do something like this:
@@ -80,10 +81,10 @@ public int Age {
 ## Can I add extra attributes to each constructor parameter?
 Yes, use the following when defining a property:
 ```c#
-// T4Immutable.PreConstructorParam: [JetBrains.Annotations.NotNull]
+[PreConstructorParam("[JetBrains.Annotations.NotNull]")]
 public string FirstName { get; }
 ```
-Bear in mind the comment must be ABOVE any attributes the property might use and that if you use it to specify attributes they must have the full name (including namespace) or else there would be compilation errors.
+Bear in mind that if you use it to specify attributes they must have the full name (including namespace) or else there would be compilation errors. Also bear in mind the string has to be constant, this is, it shouldn't depend on other const values.
 
 ## How do I enforce automatic null checking for the constructor parameters? What about for the properties?
 If you use this:
@@ -255,5 +256,4 @@ partial class Person : IEquatable<Person> {
   }
   
 }
-
 ```
