@@ -29,6 +29,13 @@ namespace T4Immutable {
         return true;
       }
 
+      // check for the special case of KeyValuePair (items of a dictionary)
+      var aKvp = KeyValuePairMethods.TryExtractKeyValuePair(a);
+      if (aKvp != null) {
+        var bKvp = KeyValuePairMethods.TryExtractKeyValuePair(b);
+        return AreEqual(aKvp.Item1, bKvp.Item1) && AreEqual(aKvp.Item2, bKvp.Item2);
+      }
+
       // one extra check for enumerables
 
       // first a fastcheck for collection size
@@ -75,6 +82,12 @@ namespace T4Immutable {
 
       var oEnumerable = o as IEnumerable;
       if (oEnumerable == null) {
+        // check for the special case of KeyValuePair (items of a dictionary)
+        var kvp = KeyValuePairMethods.TryExtractKeyValuePair(o);
+        if (kvp != null) {
+          return GetHashCodeFor(kvp.Item1, kvp.Item2);
+        }
+
         return o.GetHashCode();
       }
 
@@ -122,6 +135,12 @@ namespace T4Immutable {
 
       var oEnumerable = o as IEnumerable;
       if (oEnumerable == null) {
+        // check for the special case of KeyValuePair (items of a dictionary)
+        var kvp = KeyValuePairMethods.TryExtractKeyValuePair(o);
+        if (kvp != null) {
+          return "(" + ToStringForSingleObject(kvp.Item1) + ", " + ToStringForSingleObject(kvp.Item2) + ")";
+        }
+
         return o.ToString();
       }
 
