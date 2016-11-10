@@ -2,6 +2,9 @@
 ###T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
+#### v1.1.4 release notes
+* Collection special cases are done when they inherit from ICollection instead of IEnumerable.
+
 #### v1.1.3 release notes
 * Using the dynamic keyword instead of reflection for faster KeyValuePair handling.
 
