@@ -2,7 +2,7 @@
 ###T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
-#### v1.1.1 release notes
+#### v1.1.2 release notes
 * Generated Equals, GetHashCode and ToString now properly support collections as long as they implement IEnumerator. This means that arrays, List, Set, Dictionary, plus its Immutable variants are properly handled.
 
 #### v1.1.0 release notes
@@ -31,9 +31,9 @@ class Person {
 
 It will automatically generate for you in a separate partial class file the following:
 * A constructor such as ```public Person(string firstName, string lastName, int age = 18)``` that will initialize the values.
-* Working implementations for ```Equals(object other)``` and ```Equals(Person other)```. Also it will add the ```IEquatable<Person>``` interface for you.
+* Working implementations for ```Equals(object other)``` and ```Equals(Person other)```.
 * Working implementations for ```operator==``` and ```operator!=```
-* A working implementation of ```GetHashCode()```
+* A working implementation of ```GetHashCode()```.
 * A better ```ToString()``` with output such as ```"Person { FirstName=John, LastName=Doe, Age=21 }"```
 * A ```Person With(...)``` method that can be used to generate a new immutable clone with 0 or more properties changed (e.g. ```var janeDoe = johnDoe.With(firstName: "Jane", age: 20)```
 
@@ -50,6 +50,9 @@ Just use the ```[ImmutableClass]``` attribute over the class. The class will be 
 * It cannot have a base class (probably to be lifted in a future update if anybody can show a proper use case), it can however have any interfaces.
 
 Besides those checks it is your responsibility to make the immutable object behave correctly. For example you should use ImmutableList instead of List and so on. This project is just made to reduce the boilerplate after all, not ensure correctness.
+
+## How are collection (Array, List, Set, Dictionary... plues their Immutable versions) based properties handled?
+They just work as long as they inherit from ```IEnumerable``` (as all of the basic ones do). The generated Equals() will check they are equivalent by checking their contents, as well as the generated GetHashCode(). Nested collections are not a problem as well.
 
 ## I don't want X. Can I control what gets generated?
 You sure can, just add to the ImmutableClass attribute something like this:
