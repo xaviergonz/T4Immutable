@@ -55,7 +55,7 @@ Just use the ```[ImmutableClass]``` attribute over the class. The class will be 
 Besides those checks it is your responsibility to make the immutable object behave correctly. For example you should use ImmutableList instead of List and so on. This project is just made to reduce the boilerplate after all, not ensure correctness.
 
 ## How are collection (Array, List, Set, Dictionary... plues their Immutable versions) based properties handled?
-They just work as long as they inherit from ```IEnumerable``` (as all of the basic ones do). The generated Equals() will check they are equivalent by checking their contents, as well as the generated GetHashCode(). Nested collections are not a problem as well.
+They just work as long as they inherit from ```ICollection``` (as all of the basic ones do). The generated Equals() will check they are equivalent by checking their contents, as well as the generated GetHashCode(). Nested collections are not a problem as well.
 
 ## I don't want X. Can I control what gets generated?
 You sure can, just add to the ImmutableClass attribute something like this:
