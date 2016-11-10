@@ -15,7 +15,7 @@ VSH = this.VisualStudioHelper;
 <#+
 // constants
 const string ToolName = "T4Immutable";
-const string ToolVersion = "1.1.2";
+const string ToolVersion = "1.1.3";
 const string CustomNamespace = "T4Immutable";
 
 const string CustomGeneratedCodeAttribute = CustomNamespace + ".GeneratedCodeAttribute";

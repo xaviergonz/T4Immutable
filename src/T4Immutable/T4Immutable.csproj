@@ -31,13 +31,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="KeyValuePairMethods.cs" />
+    <Compile Include="KeyValuePairHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WithParam.cs" />
   </ItemGroup>

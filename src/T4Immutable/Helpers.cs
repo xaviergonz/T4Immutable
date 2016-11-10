@@ -30,9 +30,9 @@ namespace T4Immutable {
       }
 
       // check for the special case of KeyValuePair (items of a dictionary)
-      var aKvp = KeyValuePairMethods.TryExtractKeyValuePair(a);
+      var aKvp = KeyValuePairHelper.TryExtractKeyValuePair(a);
       if (aKvp != null) {
-        var bKvp = KeyValuePairMethods.TryExtractKeyValuePair(b);
+        var bKvp = KeyValuePairHelper.TryExtractKeyValuePair(b);
         return AreEqual(aKvp.Item1, bKvp.Item1) && AreEqual(aKvp.Item2, bKvp.Item2);
       }
 
@@ -83,7 +83,7 @@ namespace T4Immutable {
       var oEnumerable = o as IEnumerable;
       if (oEnumerable == null) {
         // check for the special case of KeyValuePair (items of a dictionary)
-        var kvp = KeyValuePairMethods.TryExtractKeyValuePair(o);
+        var kvp = KeyValuePairHelper.TryExtractKeyValuePair(o);
         if (kvp != null) {
           return GetHashCodeFor(kvp.Item1, kvp.Item2);
         }
@@ -136,7 +136,7 @@ namespace T4Immutable {
       var oEnumerable = o as IEnumerable;
       if (oEnumerable == null) {
         // check for the special case of KeyValuePair (items of a dictionary)
-        var kvp = KeyValuePairMethods.TryExtractKeyValuePair(o);
+        var kvp = KeyValuePairHelper.TryExtractKeyValuePair(o);
         if (kvp != null) {
           return "(" + ToStringForSingleObject(kvp.Item1) + ", " + ToStringForSingleObject(kvp.Item2) + ")";
         }
