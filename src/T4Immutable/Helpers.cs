@@ -36,25 +36,20 @@ namespace T4Immutable {
         return AreEqual(aKvp.Item1, bKvp.Item1) && AreEqual(aKvp.Item2, bKvp.Item2);
       }
 
-      // one extra check for enumerables
+      // one extra check for collections
 
-      // first a fastcheck for collection size
       var aCollection = a as ICollection;
       var bCollection = b as ICollection;
-      if ((aCollection != null) && (bCollection != null)) {
-        if (aCollection.Count != bCollection.Count) {
-          return false;
-        }
-      }
-
-      var aEnumerable = a as IEnumerable;
-      var bEnumerable = b as IEnumerable;
-      if ((aEnumerable == null) || (bEnumerable == null)) {
+      if ((aCollection == null) || (bCollection == null)) {
         return false;
       }
 
-      var aEnum = aEnumerable.GetEnumerator();
-      var bEnum = bEnumerable.GetEnumerator();
+      if (aCollection.Count != bCollection.Count) {
+        return false;
+      }
+
+      var aEnum = aCollection.GetEnumerator();
+      var bEnum = bCollection.GetEnumerator();
 
       while (aEnum.MoveNext()) {
         if (!bEnum.MoveNext()) {
@@ -71,7 +66,7 @@ namespace T4Immutable {
     }
 
     /// <summary>
-    /// Gets the hashcode of a single object. If the object is an enumerable it will make a hashcode of the enumeration.
+    /// Gets the hashcode of a single object. If the object is a collection it will make a hashcode of the collection.
     /// </summary>
     /// <param name="o">Object to make the hashcode for.</param>
     /// <returns>A hashcode.</returns>
@@ -80,8 +75,8 @@ namespace T4Immutable {
         return 0;
       }
 
-      var oEnumerable = o as IEnumerable;
-      if (oEnumerable == null) {
+      var oCollection = o as ICollection;
+      if (oCollection == null) {
         // check for the special case of KeyValuePair (items of a dictionary)
         var kvp = KeyValuePairHelper.TryExtractKeyValuePair(o);
         if (kvp != null) {
@@ -91,8 +86,8 @@ namespace T4Immutable {
         return o.GetHashCode();
       }
 
-      // make a hash of the items if it is an enumerable
-      var oEnum = oEnumerable.GetEnumerator();
+      // make a hash of the items if it is a collection
+      var oEnum = oCollection.GetEnumerator();
 
       var list = new List<object>();
       while (oEnum.MoveNext()) {
@@ -133,8 +128,8 @@ namespace T4Immutable {
         return "null";
       }
 
-      var oEnumerable = o as IEnumerable;
-      if (oEnumerable == null) {
+      var oCollection = o as ICollection;
+      if (oCollection == null) {
         // check for the special case of KeyValuePair (items of a dictionary)
         var kvp = KeyValuePairHelper.TryExtractKeyValuePair(o);
         if (kvp != null) {
@@ -144,8 +139,8 @@ namespace T4Immutable {
         return o.ToString();
       }
 
-      // make a list of the items if it is an enumerable
-      var oEnum = oEnumerable.GetEnumerator();
+      // make a list of the items if it is a collection
+      var oEnum = oCollection.GetEnumerator();
 
       var list = new List<object>();
       while (oEnum.MoveNext()) {
