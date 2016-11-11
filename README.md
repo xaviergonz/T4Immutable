@@ -2,18 +2,14 @@
 ###T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
-#### v1.1.4 release notes
-* Collection special cases are done when they inherit from ICollection instead of IEnumerable.
-
-#### v1.1.3 release notes
-* Using the dynamic keyword instead of reflection for faster KeyValuePair handling.
-
-#### v1.1.2 release notes
-* Generated Equals, GetHashCode and ToString now properly support collections as long as they implement IEnumerator. This means that arrays, List, Set, Dictionary, plus its Immutable variants are properly handled.
-
-#### v1.1.0 release notes
-* ImmutableClassOptions.EnableXXX/DisableXXX have been renamed to ImmutableClassOptions.IncludeXXX/ExcludeXXX
-* preConstructorParam code comment has been changed to the PreConstructorParam attribute
+#### Release notes
+* [v1.1.5] Added a PreConstructor option to write code such as atributtes before generated constructors.
+* [v1.1.5] Added ExcludeConstructor and AllowCustomConstructors options.
+* [v1.1.4] Collection special cases are done when they inherit from ICollection instead of IEnumerable.
+* [v1.1.3] Using the dynamic keyword instead of reflection for faster KeyValuePair handling.
+* [v1.1.2] Generated Equals, GetHashCode and ToString now properly support collections as long as they implement IEnumerator. This means that arrays, List, Set, Dictionary, plus its Immutable variants are properly handled.
+* [v1.1.0] ImmutableClassOptions.EnableXXX/DisableXXX have been renamed to ImmutableClassOptions.IncludeXXX/ExcludeXXX
+* [v1.1.0] preConstructorParam code comment has been changed to the PreConstructorParam attribute
 
 ## Why use this?
 Creating proper immutable objects in C# requires a lot boilerplate code. The aim of this project is to reduce this to a minimum by means of automatic code generation via T4 templates. For instance, given the following class:
@@ -63,8 +59,18 @@ There are plugins out there that auto-run T4 templates once code changes, but if
 ## How are collection (Array, List, Set, Dictionary... plues their Immutable versions) based properties handled?
 They just work as long as they inherit from ```ICollection``` (as all of the basic ones do). The generated Equals() will check they are equivalent by checking their contents, as well as the generated GetHashCode(). Nested collections are not a problem as well.
 
-## Do generated classes serialize/deserialize correctly with JSON.NET?
-As long as the generated constructor is kept public they do.
+## Do generated classes serialize/deserialize correctly with JSON.NET / Protobuf.NET / others?
+#### JSON.NET
+* As long as the generated constructor is kept public (maybe even protected, but didn't test that) they do.
+
+#### Protobuf.NET
+* Mark your class as ```[ProtoContract]``` and add the ```ImmutableClassOptions.AllowCustomConstructors```
+* Add an empty private constructor
+* Mark the properties with ```[ProtoMember(unique number)]```
+* Then it will work
+
+#### Others
+* Let me know :)
 
 ## I don't want X. Can I control what gets generated?
 You sure can, just add to the ImmutableClass attribute something like this:
@@ -74,7 +80,9 @@ You sure can, just add to the ImmutableClass attribute something like this:
   ImmutableClassOptions.ExcludeGetHashCode | 
   ImmutableClassOptions.IncludeOperatorEquals | 
   ImmutableClassOptions.ExcludeToString | 
-  ImmutableClassOptions.ExcludeWith)]
+  ImmutableClassOptions.ExcludeWith |
+  ImmutableClassOptions.ExcludeConstructor |
+  ImmutableClassOptions.AllowCustomConstructors)]
 ```
 The names should be pretty self explanatory. Note that even if you exclude for example the Equals implementation you can still use them internally by invoking the ```private bool ImmutableEquals(...)``` implementation. This is done in case you might want to write your own ```Equals(...)``` yet still use the generated one as a base.
 Take care in not using "using Foo = ImmutableClassOptions" to save some typing, it won't work.
@@ -153,6 +161,7 @@ public static Point<T> FromAngleAndDistance(T distance, double angle) {
   return new Point(x, y);
 }
 ```
+Still, if you still aren't satisfied by this you can enable the ```ImmutableOptions.AllowCustomConstructors``` to your own risk.
 
 ## How do I change the order of the arguments in the generated constructor?
 Just change the order of the properties.
