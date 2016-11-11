@@ -40,7 +40,7 @@ It will automatically generate for you in a separate partial class file the foll
 * A ```Person With(...)``` method that can be used to generate a new immutable clone with 0 or more properties changed (e.g. ```var janeDoe = johnDoe.With(firstName: "Jane", age: 20)```
 
 ## How do I start?
-Just install the T4Immutable nuget package.
+Just install the T4Immutable nuget package and then use ¨Build - Transform All T4 Templates¨. Remember to do this everytime you update the package or any of your immutable classes change. If you want to automate it there are plugins out there that auto-run T4 templates once code changes.
 
 ## What's needed to make an immutable class?
 Just use the ```[ImmutableClass]``` attribute over the class. The class will be auto-checked to meet the following constraints before code generation takes place:
@@ -52,9 +52,6 @@ Just use the ```[ImmutableClass]``` attribute over the class. The class will be 
 * It cannot have a base class (probably to be lifted in a future update if anybody can show a proper use case), it can however have any interfaces.
 
 Besides those checks it is your responsibility to make the immutable object behave correctly. For example you should use ImmutableList instead of List and so on. This project is just made to reduce the boilerplate after all, not ensure correctness.
-
-## How do I rebuild the auto-generated files once I make a change in my code?
-There are plugins out there that auto-run T4 templates once code changes, but if you don't want/need one then just use ¨Build - Transform All T4 Templates¨.
 
 ## How are collection (Array, List, Set, Dictionary... plues their Immutable versions) based properties handled?
 They just work as long as they inherit from ```ICollection``` (as all of the basic ones do). The generated Equals() will check they are equivalent by checking their contents, as well as the generated GetHashCode(). Nested collections are not a problem as well.
