@@ -30,7 +30,7 @@ var outFileNamesUsed = new HashSet<string>();
 
 // init the parser
 var curProject = VSH.CurrentProject;
-var curProjectDir = Path.GetDirectoryName(curProject.FullName);
+var curProjectDir = System.IO.Path.GetDirectoryName(curProject.FullName);
 Parser.ReadAttributesCs(curProjectDir);
 
 var allProjectItems = VSH.GetAllProjectItems();
@@ -103,83 +103,14 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   var allProps = info.RelevantProps;
 
   // make our partial class with all the boilerplate
-  // default settings
-  bool enableEquals = true;
-  bool enableOperatorEquals = false;
-  bool enableGetHashCode = true;
-  bool enableWith = true;
-  bool enableToString = true;
-  string constructorAccessLevel = "public";
-
-  // disable certain features depending on the attrib props
-  foreach(var arg in info.ImmutableAttribute.Arguments.OfType<EnvDTE80.CodeAttributeArgument>()) {
-    var val = arg.Value.Trim();
-
-    const string optionsArg = "Options";
-    const string constructorAccessLevelArg = "ConstructorAccessLevel";
-
-    if (arg.Name == optionsArg) {
-      object parsed;
-      try {
-        parsed = Parser.ParseLiteral<object>(CustomNamespace + ".ImmutableClassOptions", val);
-      }
-      catch(ParserException ex) {
-        throw new T4ImmutableException(fileName, info.FullName, ex.Message);
-      }
-
-      var options = Parser.SplitEnumFields(parsed);
-      foreach (var option in options) {
-        switch(option) {
-          case "ExcludeEquals":
-            enableEquals = false;
-            break;
-          case "ExcludeGetHashCode":
-            enableGetHashCode = false;
-            break;
-          case "IncludeOperatorEquals":
-            enableOperatorEquals = true;
-            break;
-          case "ExcludeToString":
-            enableToString = false;
-            break;
-          case "ExcludeWith":
-            enableWith = false;
-            break;
-          default:
-            throw new T4ImmutableException(fileName, info.FullName, "Error parsing " + optionsArg + " argument of ImmutableClassAttribute");
-        }
-      }
-    }
-    else if (arg.Name == constructorAccessLevelArg) {
-      object parsed;
-      try {
-        parsed = Parser.ParseLiteral<object>(CustomNamespace + ".ConstructorAccessLevel", val);
-      }
-      catch(ParserException ex) {
-        throw new T4ImmutableException(fileName, info.FullName, ex.Message);
-      }
-
-      switch(parsed.ToString()) {
-        case "Public":
-          constructorAccessLevel = "public";
-          break;
-        case "Protected":
-          constructorAccessLevel = "protected";
-          break;
-        case "Internal":
-          constructorAccessLevel = "internal";
-          break;
-        case "Private":
-          constructorAccessLevel = "private";
-          break;
-        case "ProtectedInternal":
-          constructorAccessLevel = "protected internal";
-          break;
-        default:
-          throw new T4ImmutableException(fileName, info.FullName, "Error parsing " + constructorAccessLevelArg + " argument of ImmutableClassAttribute");
-      }
-    }
-  }
+  bool enableConstructor = info.EnableConstructor;
+  bool enableEquals = info.EnableEquals;
+  bool enableOperatorEquals = info.EnableOperatorEquals;
+  bool enableGetHashCode = info.EnableGetHashCode;
+  bool enableWith = info.EnableWith;
+  bool enableToString = info.EnableToString;
+  string constructorAccessLevel = info.ConstructorAccessLevel;
+  bool allowCustomConstructors = info.AllowCustomConstructors;
 
   // namespace
   var namesp = info.Namespace;
@@ -240,8 +171,11 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   }
 
   // constructor
-  {
+  if (enableConstructor) {
     fw.WIGenerated(ind);
+    if (!string.IsNullOrWhiteSpace(info.PreConstructor)) {
+      fw.WI(ind, info.PreConstructor);
+    }
     fw.WI(ind, constructorAccessLevel + " " + info.Name + "(" + string.Join(", ", allProps.Select(p => p.ToFullParam(true, true, true))) + ") {");
     ind++;
       
@@ -356,7 +290,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
     fw.WIGenerated(ind);
     fw.WI(ind, "private string ImmutableToString() {");
     ind++;
-    fw.WI(ind, "return T4Immutable.Helpers.ToStringFor(nameof(" + info.Name + info.GenericString + "), " + string.Join(", ", allProps.Select(p => "new Tuple<string, object>(nameof(this." + p.Name + "), this." + p.Name + ")")) + ");") ;
+    fw.WI(ind, "return T4Immutable.Helpers.ToStringFor(nameof(" + info.Name + info.GenericString + "), " + string.Join(", ", allProps.Select(p => "new System.Tuple<string, object>(nameof(this." + p.Name + "), this." + p.Name + ")")) + ");") ;
     ind--;
     fw.WI(ind, "}");
     fw.WI(ind, "");

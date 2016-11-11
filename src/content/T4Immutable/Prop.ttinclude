@@ -85,7 +85,6 @@ public class PropInfo {
         throw new T4ImmutableException(fileName, FullName, CustomPreConstructorParamAttribute + " - " + ex.Message);
       }
 
-      if (parsed == null) throw new T4ImmutableException(fileName, FullName, CustomPreConstructorParamAttribute + " - Argument cannot be null");
       PreConstructorParamString = parsed;
     }
 

@@ -17,6 +17,7 @@ namespace T4Immutable {
   public sealed class ImmutableClassAttribute : Attribute {
     private ConstructorAccessLevel _constructorAccessLevel = ConstructorAccessLevel.Public;
     private ImmutableClassOptions _options = ImmutableClassOptions.None;
+    private string _preConstructor;
 
     /// <summary>
     /// Immutable class generation options.
@@ -33,6 +34,14 @@ namespace T4Immutable {
       get { return _constructorAccessLevel; }
       set { _constructorAccessLevel = value; }
     }
+
+    /// <summary>
+    /// String with code to add before the constructor.
+    /// </summary>
+    public string PreConstructor {
+      get { return _preConstructor; }
+      set { _preConstructor = value; }
+    }
   }
 
   /// <summary>
@@ -48,27 +57,37 @@ namespace T4Immutable {
     /// <summary>
     /// Do not generate Equals() implementation or add the IEquatable interface.
     /// </summary>
-    ExcludeEquals = 1,
+    ExcludeEquals = 1 << 0,
 
     /// <summary>
     /// Do not generate a GetHashCode() implementation.
     /// </summary>
-    ExcludeGetHashCode = 2,
+    ExcludeGetHashCode = 1 << 1,
 
     /// <summary>
     /// Generate operator == and operator !=.
     /// </summary>
-    IncludeOperatorEquals = 4,
+    IncludeOperatorEquals = 1 << 2,
 
     /// <summary>
-    /// Do not generated a ToString() implementation.
+    /// Do not generate a ToString() implementation.
     /// </summary>
-    ExcludeToString = 8,
+    ExcludeToString = 1 << 3,
 
     /// <summary>
     /// Do not generate a With() implementation.
     /// </summary>
-    ExcludeWith = 16
+    ExcludeWith = 1 << 4,
+
+    /// <summary>
+    /// Do not generate a constructor.
+    /// </summary>
+    ExcludeConstructor = 1 << 5,
+
+    /// <summary>
+    /// Allow the user to define his own constructors.
+    /// </summary>
+    AllowCustomConstructors = 1 << 6,
   }
 
   /// <summary>
@@ -116,7 +135,7 @@ namespace T4Immutable {
   }
 
   /// <summary>
-  /// String to add before the constructor parameter.
+  /// String with code to add before the constructor parameter.
   /// </summary>
   [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
   public sealed class PreConstructorParamAttribute : Attribute {

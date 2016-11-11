@@ -36,7 +36,15 @@ public class ClassInfo {
   public List<FieldInfo> RelevantFields { get; private set; }
   public List<PropInfo> RelevantProps { get; private set; }
   public bool HasPostConstructor { get; private set; }
-
+  public bool EnableConstructor { get; private set; }
+  public bool EnableEquals { get; private set; }
+  public bool EnableOperatorEquals { get; private set; }
+  public bool EnableGetHashCode { get; private set; }
+  public bool EnableWith { get; private set; }
+  public bool EnableToString { get; private set; }
+  public string ConstructorAccessLevel { get; private set; }
+  public bool AllowCustomConstructors { get; private set; }
+  public string PreConstructor { get; private set; }
 
   public ClassInfo(CodeClass thisClass) {
     CodeClass = (EnvDTE80.CodeClass2)thisClass;
@@ -94,6 +102,102 @@ public class ClassInfo {
 
     HasPostConstructor = CodeClass.Members.OfType<EnvDTE80.CodeFunction2>().Any(m => IsPostConstructor(m));
 
+    // default settings
+    EnableConstructor = true;
+    EnableEquals = true;
+    EnableOperatorEquals = false;
+    EnableGetHashCode = true;
+    EnableWith = true;
+    EnableToString = true;
+    ConstructorAccessLevel = "public";
+    AllowCustomConstructors = false;
+    PreConstructor = null;
+
+    // disable certain features depending on the attrib props
+    foreach(var arg in ImmutableAttribute.Arguments.OfType<EnvDTE80.CodeAttributeArgument>()) {
+      var val = arg.Value.Trim();
+
+      const string optionsArg = "Options";
+      const string constructorAccessLevelArg = "ConstructorAccessLevel";
+      const string preConstructorArg = "PreConstructor";
+
+      if (arg.Name == optionsArg) {
+        object parsed;
+        try {
+          parsed = Parser.ParseLiteral<object>(CustomNamespace + ".ImmutableClassOptions", val);
+        }
+        catch(ParserException ex) {
+          throw new T4ImmutableException(fileName, FullName, ex.Message);
+        }
+
+        var options = Parser.SplitEnumFields(parsed);
+        foreach (var option in options) {
+          switch(option) {
+            case "ExcludeEquals":
+              EnableEquals = false;
+              break;
+            case "ExcludeGetHashCode":
+              EnableGetHashCode = false;
+              break;
+            case "IncludeOperatorEquals":
+              EnableOperatorEquals = true;
+              break;
+            case "ExcludeToString":
+              EnableToString = false;
+              break;
+            case "ExcludeWith":
+              EnableWith = false;
+              break;
+            case "ExcludeConstructor":
+              EnableConstructor = false;
+              break;
+            case "AllowCustomConstructors":
+              AllowCustomConstructors = true;
+              break;
+            default:
+              throw new T4ImmutableException(fileName, FullName, "Error parsing " + optionsArg + " argument of ImmutableClassAttribute");
+          }
+        }
+      }
+      else if (arg.Name == constructorAccessLevelArg) {
+        object parsed;
+        try {
+          parsed = Parser.ParseLiteral<object>(CustomNamespace + ".ConstructorAccessLevel", val);
+        }
+        catch(ParserException ex) {
+          throw new T4ImmutableException(fileName, FullName, ex.Message);
+        }
+
+        switch(parsed.ToString()) {
+          case "Public":
+            ConstructorAccessLevel = "public";
+            break;
+          case "Protected":
+            ConstructorAccessLevel = "protected";
+            break;
+          case "Internal":
+            ConstructorAccessLevel = "internal";
+            break;
+          case "Private":
+            ConstructorAccessLevel = "private";
+            break;
+          case "ProtectedInternal":
+            ConstructorAccessLevel = "protected internal";
+            break;
+          default:
+            throw new T4ImmutableException(fileName, FullName, "Error parsing " + constructorAccessLevelArg + " argument of ImmutableClassAttribute");
+        }
+      }
+      else if (arg.Name == preConstructorArg) {
+        try {
+          PreConstructor = Parser.ParseLiteral<string>("string", val);
+        }
+        catch(ParserException ex) {
+          throw new T4ImmutableException(fileName, FullName, ex.Message);
+        }
+      }
+    }
+
     // validation
     var partialClasses = VSH.CodeModel.GetPartialClasses(CodeClass).Select(c => new ClassInfo(c)).ToList();
 
@@ -118,11 +222,13 @@ public class ClassInfo {
       throw new T4ImmutableException(fileName, FullName, "Immutable classes cannot have a base class");
     }
 
-    // no constructors allowed
-    var memberFuncs = CodeClass.Members.OfType<CodeFunction>().ToList();
-    var constructors = memberFuncs.Where(m => m.FunctionKind == vsCMFunction.vsCMFunctionConstructor).ToList();
-    if (constructors.Count > 0) {
-      throw new T4ImmutableException(fileName, FullName, "Immutable classes cannot have constructors (but for generated ones)");
+    if (!AllowCustomConstructors) {
+      // no constructors allowed
+      var memberFuncs = CodeClass.Members.OfType<CodeFunction>().ToList();
+      var constructors = memberFuncs.Where(m => m.FunctionKind == vsCMFunction.vsCMFunctionConstructor).ToList();
+      if (constructors.Count > 0) {
+        throw new T4ImmutableException(fileName, FullName, "Immutable classes cannot have constructors but for generated ones (use ImmutableClassOptions.AllowCustomConstructors if you want to remove this constraint)");
+      }
     }
 
     if (HasPostConstructor) {
