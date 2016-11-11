@@ -57,8 +57,14 @@ Just use the ```[ImmutableClass]``` attribute over the class. The class will be 
 
 Besides those checks it is your responsibility to make the immutable object behave correctly. For example you should use ImmutableList instead of List and so on. This project is just made to reduce the boilerplate after all, not ensure correctness.
 
+## How do I rebuild the auto-generated files once I make a change in my code?
+There are plugins out there that auto-run T4 templates once code changes, but if you don't want/need one then just use ¨Build - Transform All T4 Templates¨.
+
 ## How are collection (Array, List, Set, Dictionary... plues their Immutable versions) based properties handled?
 They just work as long as they inherit from ```ICollection``` (as all of the basic ones do). The generated Equals() will check they are equivalent by checking their contents, as well as the generated GetHashCode(). Nested collections are not a problem as well.
+
+## Do generated classes serialize/deserialize correctly with JSON.NET?
+As long as the generated constructor is kept public they do.
 
 ## I don't want X. Can I control what gets generated?
 You sure can, just add to the ImmutableClass attribute something like this:
@@ -183,9 +189,6 @@ class Point {
 }
 ```
 However if you do stuff like this, then since internally it has become mutable-ish you will need to use a lock or some other method if you want it to work properly when the object is used concurrently. A probably better solution would be to initialize the ```_Distance``` member inside the ```PostConstructor()```. It all depends on your use case.
-
-## How do I rebuild the auto-generated files once I make a change in my code?
-There are plugins out there that auto-run T4 templates once code changes, but if you don't want/need one then just use ¨Build - Transform All T4 Templates¨.
 
 ## Does Intellisense and all that stuff work after using this?
 Absolutely, since the generated files are .cs files Intellisense will pick the syntax without problems.
