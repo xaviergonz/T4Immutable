@@ -220,7 +220,6 @@ Here you go (excluding some redundant attributes):
 using System;
 
 partial class Person : IEquatable<Person> {
-  [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.1.1"), System.Diagnostics.DebuggerNonUserCode]
   public Person(string firstName, string lastName, int age = 18) {
     this.FirstName = firstName;
     this.LastName = lastName;
