@@ -36,7 +36,7 @@ It will automatically generate for you in a separate partial class file the foll
 * A `Person With(...)` method that can be used to generate a new immutable clone with 0 or more properties changed (e.g. `var janeDoe = johnDoe.With(firstName: "Jane", age: 20)`
 
 ## How do I start?
-Just install the T4Immutable nuget package and then use ¨**Build - Transform All T4 Templates**¨. *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates once code changes.
+Just install the T4Immutable nuget package and then use ¨**Build - Transform All T4 Templates**¨. *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates before build such as [AutoT4](https://github.com/bennor/AutoT4).
 
 ## What's needed to make an immutable class?
 Just mark the class with the use the `[ImmutableClass]` attribute. The class will be auto-checked to meet the following constraints before code generation takes place:
