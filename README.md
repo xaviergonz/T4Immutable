@@ -40,7 +40,7 @@ Just install the T4Immutable nuget package and then use ¨**Build - Transform Al
 
 ## What's needed to make an immutable class?
 Just mark the class with the use the `[ImmutableClass]` attribute. The class will be auto-checked to meet the following constraints before code generation takes place:
-* Any properties NOT marked as `ComputedProperty` will need to be either auto properites or have a non-public setter.
+* Any properties _not_ marked as `ComputedProperty` will need to be either auto properites or have a non-public setter.
 * It should not have any custom constructors since one will be auto-generated, however please check the "Constructor overrides" section below to see ways to overcome this limitation.
 * Any default values (see "How to specify property default values?") will be checked to have the same type than the properties.
 * It cannot be static.
