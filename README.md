@@ -3,13 +3,13 @@
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
 #### Release notes
-* [v1.1.5] Added a PreConstructor option to write code such as atributtes before generated constructors.
-* [v1.1.5] Added ExcludeConstructor and AllowCustomConstructors options.
-* [v1.1.4] Collection special cases are done when they inherit from ICollection instead of IEnumerable.
-* [v1.1.3] Using the dynamic keyword instead of reflection for faster KeyValuePair handling.
-* [v1.1.2] Generated Equals, GetHashCode and ToString now properly support collections as long as they implement IEnumerator. This means that arrays, List, Set, Dictionary, plus its Immutable variants are properly handled.
-* [v1.1.0] ImmutableClassOptions.EnableXXX/DisableXXX have been renamed to ImmutableClassOptions.IncludeXXX/ExcludeXXX
-* [v1.1.0] preConstructorParam code comment has been changed to the PreConstructorParam attribute
+* **[v1.1.5]** Added a PreConstructor option to write code such as atributtes before generated constructors.
+* **[v1.1.5]** Added ExcludeConstructor and AllowCustomConstructors options.
+* **[v1.1.4]** Collection special cases are done when they inherit from ICollection instead of IEnumerable.
+* **[v1.1.3]** Using the dynamic keyword instead of reflection for faster KeyValuePair handling.
+* **[v1.1.2]** Generated Equals, GetHashCode and ToString now properly support collections as long as they implement IEnumerator. This means that arrays, List, Set, Dictionary, plus its Immutable variants are properly handled.
+* **[v1.1.0]** ImmutableClassOptions.EnableXXX/DisableXXX have been renamed to ImmutableClassOptions.IncludeXXX/ExcludeXXX
+* **[v1.1.0]** preConstructorParam code comment has been changed to the PreConstructorParam attribute
 
 ## Why use this?
 Creating proper immutable objects in C# requires a lot boilerplate code. The aim of this project is to reduce this to a minimum by means of automatic code generation via T4 templates. For instance, given the following class:
@@ -28,20 +28,20 @@ class Person {
 ```
 
 It will automatically generate for you in a separate partial class file the following:
-* A constructor such as ```public Person(string firstName, string lastName, int age = 18)``` that will initialize the values.
-* Working implementations for ```Equals(object other)``` and ```Equals(Person other)```.
-* Working implementations for ```operator==``` and ```operator!=```
-* A working implementation of ```GetHashCode()```.
-* A better ```ToString()``` with output such as ```"Person { FirstName=John, LastName=Doe, Age=21 }"```
-* A ```Person With(...)``` method that can be used to generate a new immutable clone with 0 or more properties changed (e.g. ```var janeDoe = johnDoe.With(firstName: "Jane", age: 20)```
+* A constructor such as `public Person(string firstName, string lastName, int age = 18)` that will initialize the values.
+* Working implementations for `Equals(object other)` and `Equals(Person other)`.
+* Working implementations for `operator==` and `operator!=`
+* A working implementation of `GetHashCode()`.
+* A better `ToString()` with output such as `"Person { FirstName=John, LastName=Doe, Age=21 }"`
+* A `Person With(...)` method that can be used to generate a new immutable clone with 0 or more properties changed (e.g. `var janeDoe = johnDoe.With(firstName: "Jane", age: 20)`
 
 ## How do I start?
-Just install the T4Immutable nuget package and then use ¨Build - Transform All T4 Templates¨. Remember to do this everytime you update the package or any of your immutable classes change. If you want to automate it there are plugins out there that auto-run T4 templates once code changes.
+Just install the T4Immutable nuget package and then use ¨**Build - Transform All T4 Templates**¨. *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates once code changes.
 
 ## What's needed to make an immutable class?
-Just use the ```[ImmutableClass]``` attribute over the class. The class will be auto-checked to meet the following constraints before code generation takes place:
-* Any properties NOT marked as ```ComputedProperty``` will need to be either auto properites or have a non-public setter.
-* It cannot have any custom constructors since one will be auto-generated, however please check the "Constructor overrides" section below to see ways to overcome this limitation.
+Just mark the class with the use the `[ImmutableClass]` attribute. The class will be auto-checked to meet the following constraints before code generation takes place:
+* Any properties NOT marked as `ComputedProperty` will need to be either auto properites or have a non-public setter.
+* It should not have any custom constructors since one will be auto-generated, however please check the "Constructor overrides" section below to see ways to overcome this limitation.
 * Any default values (see "How to specify property default values?") will be checked to have the same type than the properties.
 * It cannot be static.
 * It cannot have any extra partials besides the generated one (this support is still TODO).
@@ -50,47 +50,55 @@ Just use the ```[ImmutableClass]``` attribute over the class. The class will be 
 Besides those checks it is your responsibility to make the immutable object behave correctly. For example you should use ImmutableList instead of List and so on. This project is just made to reduce the boilerplate after all, not ensure correctness.
 
 ## How are collection (Array, List, Set, Dictionary... plues their Immutable versions) based properties handled?
-They just work as long as they inherit from ```ICollection``` (as all of the basic ones do). The generated Equals() will check they are equivalent by checking their contents, as well as the generated GetHashCode(). Nested collections are not a problem as well.
+They just work as long as they inherit from `ICollection` (as all of the basic ones do). The generated `Equals()` will check they are equivalent by checking their contents, as well as the generated `GetHashCode()`. Nested collections are not a problem as well.
 
 ## Do generated classes serialize/deserialize correctly with JSON.NET / Protobuf.NET / others?
 #### JSON.NET
-* If you use a public generated constructor it will work without changes.
-* If the constructor is not public then you will need to use ```PreConstructor = "[Newtonsoft.Json.JsonConstructor]"``` inside the ```ImmutableClass``` attribute. 
+* If you use a *public generated constructor* it will work without changes.
+* If you use a *non-public generated constructor* then:
+  * (Recommended) Either use `PreConstructor = "[Newtonsoft.Json.JsonConstructor]"` inside the `ImmutableClass` attribute. 
+  * Or:
+    1. Add the `ImmutableClassOptions.AllowCustomConstructors` to the `Options` parameter of the `ImmutableClass` attribute.
+    2. Add a constructor with no arguments.
+    3. Add a private/protected setter to all your non-computed properties if they didn't have any.
+    4. NB: In this case JSON.net will call the constructor and then _later_ set the properties one by one.
 
 #### Protobuf.NET
-* Mark your class as ```[ProtoContract]``` and add the ```ImmutableClassOptions.AllowCustomConstructors```
-* Add an empty private constructor
-* Mark the properties with ```[ProtoMember(unique number)]```
-* Then it will work
+1. Mark your class as `[ProtoContract]`.
+2. Add the `ImmutableClassOptions.AllowCustomConstructors` to the `Options` parameter of the `ImmutableClass` attribute.
+3. Add a constructor with no arguments.
+4. Mark the non-computed properties with `[ProtoMember(unique number)]`.
+5. Add to all non-computed properties a private/protected setter if they didn't have any.
 
 #### Others
 * Let me know :)
 
 ## I don't want X. Can I control what gets generated?
 You sure can, just add to the ImmutableClass attribute something like this:
-```
+```c#
 [ImmutableClass(Options = 
-  ImmutableClassOptions.ExcludeEquals | 
-  ImmutableClassOptions.ExcludeGetHashCode | 
-  ImmutableClassOptions.IncludeOperatorEquals | 
-  ImmutableClassOptions.ExcludeToString | 
-  ImmutableClassOptions.ExcludeWith |
-  ImmutableClassOptions.ExcludeConstructor |
-  ImmutableClassOptions.AllowCustomConstructors)]
+  ImmutableClassOptions.ExcludeEquals | // do not generate an Equals() method
+  ImmutableClassOptions.ExcludeGetHashCode | // do not generate a GetHashCode() method
+  ImmutableClassOptions.IncludeOperatorEquals | // generate operator== and operator!= methods
+  ImmutableClassOptions.ExcludeToString | // do not generate a ToString() method
+  ImmutableClassOptions.ExcludeWith | // do not generate a With() method
+  ImmutableClassOptions.ExcludeConstructor | // do not generate a constructor
+  ImmutableClassOptions.AllowCustomConstructors)] // allow custom constructors
 ```
-The names should be pretty self explanatory. Note that even if you exclude for example the Equals implementation you can still use them internally by invoking the ```private bool ImmutableEquals(...)``` implementation. This is done in case you might want to write your own ```Equals(...)``` yet still use the generated one as a base.
-Take care in not using "using Foo = ImmutableClassOptions" to save some typing, it won't work.
+Note that even if you exclude for example the `Equals()` method implementation you can still use them internally by invoking the `private bool ImmutableEquals(...)` implementation. This is done in case you might want to write your own `Equals()` yet still use the generated one as a base.
+Take care you do *not* use "using Foo = ImmutableClassOptions" to save some typing. Due to limitations with T4 it won't work.
 
 ## Can I control the access level (public/private/...) of the constructor?
 Yes. Do something like this:
 ```
 [ImmutableClass(ConstructorAccessLevel = ConstructorAccessLevel.Private)]
 ```
+Valid options are `Public`, `Protected` and `ProtectedInternal` and `Private`.
 
 ## Constructor post-initalization / validation
-If you need to do extra initialization / validation on the generated constructor just define a ```private void PostConstructor()``` method and do your work there. It will be invoked after all assignations are done inside the generated constructor.
+If you need to do extra initialization / validation on the generated constructor just define a `void PostConstructor()` method (access modifier doesn't matter) and do your work there. It will be invoked inside the generated constructor after all assignations are done.
 
-Alternatively it is of course also possible to do validation inside the properties private/protected setters. E.g:
+Alternatively (and recommended) it is of course also possible to do validation inside the properties private/protected setters. E.g:
 ```c#
 private int _Age;
 public int Age {
@@ -108,7 +116,7 @@ Yes, use the following when defining a property:
 [PreConstructorParam("[JetBrains.Annotations.NotNull]")]
 public string FirstName { get; }
 ```
-Bear in mind that if you use it to specify attributes they must have the full name (including namespace) or else there would be compilation errors. Also bear in mind the string has to be constant, this is, it shouldn't depend on other const values.
+Bear in mind that if you use it to specify attributes they must have the full name (including namespace) or else there would be compilation errors. Also bear in mind that due to T4 limitations the string has to be constant, this is, it shouldn't depend on other const values.
 
 ## How do I enforce automatic null checking for the constructor parameters? What about for the properties?
 If you use this:
@@ -148,26 +156,28 @@ public Person([JetBrains.Annotations.NotNull] string firstName) {
 ```
 
 ## Constructor overrides
-If you need to do alternate constructors (for example having a Point\<T>(T x, T y) Immutable class and you want to generate a point from a distance and an angle) then you can do something like:
+If you need to do alternate constructors (for example having a `Point<T>(T x, T y)` immutable class and you want to generate a point from a distance and an angle) then you can do something like:
 ```c#
 public static Point<T> FromAngleAndDistance(T distance, double angle) {
   // your code here
   return new Point(x, y);
 }
 ```
-Still, if you still aren't satisfied by this you can enable the ```ImmutableOptions.AllowCustomConstructors``` to your own risk.
+Still, if you still aren't satisfied by this you can enable the `ImmutableOptions.AllowCustomConstructors` and create your own alternate constructor to your own risk.
 
 ## How do I change the order of the arguments in the generated constructor?
 Just change the order of the properties.
 
 ## How to specify property default values?
 If you want a property to have a given default value on the auto-generated constructor there are two ways. Say that you have a property named int Age, and you want it to have the default value of 18:
-* Way 1: ```(private/protected/public/whatever) const int AgeDefaultValue = 18;```
-* Way 2: ```(private/protected/public/whatever) static readonly int AgeDefaultValue = 18;```
+* Way 1: private/protected/public/whatever `const int AgeDefaultValue = 18;`
+* Way 2: private/protected/public/whatever `static readonly int AgeDefaultValue = 18;`
 
-If you wonder why there are two alternatives it is because sometimes it is possible to add stuff such as ```new Foo()``` as a default parameter for constructors and that expression works as a readonly but does not work as a const.
+If you wonder why there are two alternatives it is because sometimes it is possible to add stuff such as `new Foo()` as a default parameter for constructors and that expression works as a readonly but does not work as a const.
 
-Please note that default values, like in a constructor, should not have gaps. This is, if you have int x, int y then you should have a default value for y or for x and y. If you want a default value for x then move it to the end.
+Please note that default values, like in a constructor, should not have gaps.
+This is, if you have int x, int y then you should have a default value for y or for x and y.
+If you want a default value for x then move it to the end.
 
 ## Does it work with generic classes? Custom methods? Nested classes?
 It sure does!
@@ -191,13 +201,13 @@ class Point {
   }
 }
 ```
-However if you do stuff like this, then since internally it has become mutable-ish you will need to use a lock or some other method if you want it to work properly when the object is used concurrently. A probably better solution would be to initialize the ```_Distance``` member inside the ```PostConstructor()```. It all depends on your use case.
+However if you do stuff like this, then since internally it has become mutable-ish you will need to use a lock or some other method if you want it to work properly when the object is used concurrently. A probably better solution would be to initialize the ```_Distance``` member inside the `PostConstructor()`. It all depends on your use case.
 
 ## Does Intellisense and all that stuff work after using this?
-Absolutely, since the generated files are .cs files Intellisense will pick the syntax without problems.
+Absolutely, since the generated files are .cs files Intellisense will pick the syntax without problems after the T4 template is built.
 
 ## Why doesn't it generate a builder?
-Why would you need one when you can set all parameters at once by using the constructor or change as many parameters as you want at once with a single ```With(...)``` invocation? That being said, please let me know if you think otherwise.
+Why would you need one when you can set all parameters at once by using the constructor or change as many parameters as you want at once with a single `With(...)` invocation? That being said, please let me know if you think otherwise.
 
 ## Can I suggest new features or whatever?
 Please do!
