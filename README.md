@@ -23,11 +23,8 @@ class Person {
   public int Age { get; }
   
   [ComputedProperty]
-  public string FullName {
-    get {
-      return FirstName + " " + LastName;
-    }
-  }
+  [ComputedProperty]
+  public string FullName => $"{FirstName} {LastName}";
 }
 ```
 
