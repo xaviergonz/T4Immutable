@@ -41,7 +41,9 @@ It will automatically generate for you in a separate partial class file the foll
 ```c#
 var builder = new Person.Builder().With(firstName: "John").With(lastName: "Doe"); // fluid way
 builder.Age = 21; // or via properties
-string firstName = builder.FirstName; // that can be read back
+// that can be read back
+string firstName = builder.FirstName; // "John"
+var lastName = builder.LastName.Value; // "Doe"
 Person johnDoe = b.Build();
 var janeDoe = johnDoe.ToBuilder().With(firstName: "Jane", age: 20).Build(); // back and forth
 ```
