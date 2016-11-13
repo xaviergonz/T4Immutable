@@ -113,6 +113,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   bool allowCustomConstructors = info.AllowCustomConstructors;
   bool enableBuilder = info.EnableBuilder;
   string builderAccessLevel = info.BuilderAccessLevel;
+  bool enableToBuilder = info.EnableToBuilder;
 
   // namespace
   var namesp = info.Namespace;
@@ -311,7 +312,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
   // With
   {
     fw.WIGenerated(ind);
-    fw.WI(ind, "private " + info.FullName + " ImmutableWith(" + string.Join(", ", allProps.Select(p => p.ToOptParam(true, true))) + ") {");
+    fw.WI(ind, "private " + info.FullName + " ImmutableWith(" + string.Join(", ", allProps.Select(p => p.ToFullOptParam(true, true))) + ") {");
     ind++;
     fw.WI(ind, "return new " + info.FullName + "(");
     ind++;
@@ -329,7 +330,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
 
     if (enableWith) {
       fw.WIGenerated(ind);
-      fw.WI(ind, "public " + info.FullName + " With(" + string.Join(", ", allProps.Select(p => p.ToOptParam(true, true))) + ") {");
+      fw.WI(ind, "public " + info.FullName + " With(" + string.Join(", ", allProps.Select(p => p.ToFullOptParam(true, true))) + ") {");
       ind++;
       fw.WI(ind, "return ImmutableWith(" + string.Join(", ", allProps.Select(p => p.ParamName)) + ");");
       ind--;
@@ -338,8 +339,36 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
     }
   }
 
+  // ToBuilder
+  if (enableToBuilder) {
+    fw.WIGenerated(ind);
+    fw.WI(ind, "public " + info.FullName + ".Builder ToBuilder() {");
+    ind++;
+    fw.WI(ind, "return ImmutableToBuilder();");
+    ind--;
+    fw.WI(ind, "}");
+    fw.WI(ind, "");
+  }
+
   // Builder
   if (enableBuilder) {
+    fw.WIGenerated(ind);
+    fw.WI(ind, "private " + info.FullName + ".Builder ImmutableToBuilder() {");
+    ind++;
+    fw.WI(ind, "return new " + info.FullName + ".Builder().With(");
+    ind++;
+    int i = 0;
+    foreach (var p in allProps) {
+      bool lastOne = i == allProps.Count - 1;
+      fw.WI(ind, "new " + p.ToOptParam() + "(this." + p.Name + ")" + (lastOne ? "" : ","));
+      i++;
+    }
+    ind--;
+    fw.WI(ind, ");");
+    ind--;
+    fw.WI(ind, "}");
+    fw.WI(ind, "");
+
     fw.WIGenerated(ind);
     fw.WI(ind, builderAccessLevel + " class Builder {");
     ind++;
@@ -347,13 +376,13 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
     // properties
     foreach (var p in allProps) {
       fw.WIGenerated(ind);
-      fw.WI(ind, "public " + p.ToOptParam(false, false) + " { get; set; }");
+      fw.WI(ind, "public " + p.ToFullOptParam(false, false) + " { get; set; }");
     }
     fw.WI(ind, "");
 
     // with method
     fw.WIGenerated(ind);
-    fw.WI(ind, "public Builder With(" + string.Join(", ", allProps.Select(p => p.ToOptParam(true, true))) + ") {");
+    fw.WI(ind, "public Builder With(" + string.Join(", ", allProps.Select(p => p.ToFullOptParam(true, true))) + ") {");
     ind++;
     foreach (var p in allProps) {
       fw.WI(ind, "if (" + p.ParamName + ".HasValue) this." + p.Name + " = " + p.ParamName + ";");

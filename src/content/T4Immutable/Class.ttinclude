@@ -47,6 +47,7 @@ public class ClassInfo {
   public string PreConstructor { get; private set; }
   public bool EnableBuilder { get; private set; }
   public string BuilderAccessLevel { get; private set; }
+  public bool EnableToBuilder { get; private set; }
 
   public ClassInfo(CodeClass thisClass) {
     CodeClass = (EnvDTE80.CodeClass2)thisClass;
@@ -116,6 +117,7 @@ public class ClassInfo {
     PreConstructor = null;
     EnableBuilder = true;
     BuilderAccessLevel = "public";
+    EnableToBuilder = true;
 
     // disable certain features depending on the attrib props
     foreach(var arg in ImmutableAttribute.Arguments.OfType<EnvDTE80.CodeAttributeArgument>()) {
@@ -161,6 +163,11 @@ public class ClassInfo {
               break;
             case "ExcludeBuilder":
               EnableBuilder = false;
+              // implies
+              EnableToBuilder = false;
+              break;
+            case "ExcludeToBuilder":
+              EnableToBuilder = false;
               break;
             default:
               throw new T4ImmutableException(fileName, FullName, "Error parsing " + optionsArg + " argument of ImmutableClassAttribute");

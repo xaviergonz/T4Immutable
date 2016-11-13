@@ -1,14 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace T4Immutable {
   internal static class KeyValuePairHelper {
-    public const string ClassFullName = "System.Collections.Generic.KeyValuePair";
-
-    private static string StripGenericFromFullName(string name) {
-      var i = name.IndexOf("`", StringComparison.Ordinal);
-      return i <= 0 ? name : name.Substring(0, i);
-    }
-
     public static Tuple<object, object> TryExtractKeyValuePair(object obj) {
       if (!IsKeyValuePair(obj.GetType())) {
         return null;
@@ -18,7 +12,11 @@ namespace T4Immutable {
     }
 
     public static bool IsKeyValuePair(Type type) {
-      return type.IsGenericType && (StripGenericFromFullName(type.FullName) == ClassFullName);
+      if (!type.IsGenericType || type.IsGenericTypeDefinition) {
+        return false;
+      }
+      var genericType = type.GetGenericTypeDefinition();
+      return ReferenceEquals(genericType, typeof(KeyValuePair<,>));
     }
   }
 }

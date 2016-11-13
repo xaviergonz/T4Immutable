@@ -99,9 +99,14 @@ namespace T4Immutable {
     AllowCustomConstructors = 1 << 6,
 
     /// <summary>
-    /// Do not generate a builder class.
+    /// Do not generate a builder class or ImmutableToBuilder() implementation. Implies ExcludeToBuilder.
     /// </summary>
     ExcludeBuilder = 1 << 7,
+
+    /// <summary>
+    /// Do not generate a ToBuilder() implementation.
+    /// </summary>
+    ExcludeToBuilder = 1 << 8,
   }
 
   /// <summary>
