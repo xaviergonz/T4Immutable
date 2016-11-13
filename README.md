@@ -217,9 +217,6 @@ However if you do stuff like this, then since internally it has become mutable-i
 ## Does Intellisense and all that stuff work after using this?
 Absolutely, since the generated files are .cs files Intellisense will pick the syntax without problems after the T4 template is built.
 
-## Why doesn't it generate a builder?
-Why would you need one when you can set all parameters at once by using the constructor or change as many parameters as you want at once with a single `With(...)` invocation? That being said, please let me know if you think otherwise.
-
 ## Can I suggest new features or whatever?
 Please do!
 
