@@ -3,6 +3,8 @@
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
 #### Release notes
+* **[v1.2.0]** Now supports generating builders.
+* **[v1.2.0]** WithParam class is now called OptParam.
 * **[v1.1.5]** Added a PreConstructor option to write code such as atributtes before generated constructors.
 * **[v1.1.5]** Added ExcludeConstructor and AllowCustomConstructors options.
 * **[v1.1.4]** Collection special cases are done when they inherit from ICollection instead of IEnumerable.
@@ -34,6 +36,12 @@ It will automatically generate for you in a separate partial class file the foll
 * A working implementation of `GetHashCode()`.
 * A better `ToString()` with output such as `"Person { FirstName=John, LastName=Doe, Age=21 }"`
 * A `Person With(...)` method that can be used to generate a new immutable clone with 0 or more properties changed (e.g. `var janeDoe = johnDoe.With(firstName: "Jane", age: 20)`
+* A `Builder` subclass that can be used to create the objects with the builder pattern such as:
+```c#
+var builder = new Person.Builder().With(firstName: "John").With(lastName: "Doe"); // fluid way
+builder.Age = 21; // or via properties
+Person johnDoe = b.Build();
+```
 
 ## How do I start?
 Just install the T4Immutable nuget package and then use ¨**Build - Transform All T4 Templates**¨. *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates before build such as [AutoT4](https://github.com/bennor/AutoT4).
@@ -85,17 +93,18 @@ You sure can, just add to the ImmutableClass attribute something like this:
   ImmutableClassOptions.ExcludeToString | // do not generate a ToString() method
   ImmutableClassOptions.ExcludeWith | // do not generate a With() method
   ImmutableClassOptions.ExcludeConstructor | // do not generate a constructor
+  ImmutableClassOptions.ExcludeBuilder | // do not generate a builder (usually used alongside ExcludeConstructor)
   ImmutableClassOptions.AllowCustomConstructors)] // allow custom constructors
 ```
 Note that even if you exclude for example the `Equals()` method implementation you can still use them internally by invoking the `private bool ImmutableEquals(...)` implementation. This is done in case you might want to write your own `Equals()` yet still use the generated one as a base.
 Take care you do *not* use "using Foo = ImmutableClassOptions" to save some typing. Due to limitations with T4 it won't work.
 
-## Can I control the access level (public/private/...) of the constructor?
+## Can I control the access level (public/private/...) of the constructor or the builder?
 Yes. Do something like this:
 ```
-[ImmutableClass(ConstructorAccessLevel = ConstructorAccessLevel.Private)]
+[ImmutableClass(ConstructorAccessLevel = ConstructorAccessLevel.Private, BuilderAccessLevel = BuilderAccessLevel.Protected)]
 ```
-Valid options are `Public`, `Protected` and `ProtectedInternal` and `Private`.
+Valid options are `Public`, `Protected`, `ProtectedInternal`, `Internal` and `Private`.
 
 ## Constructor post-initalization / validation
 If you need to do extra initialization / validation on the generated constructor just define a `void PostConstructor()` method (access modifier doesn't matter) and do your work there. It will be invoked inside the generated constructor after all assignations are done.
@@ -242,11 +251,11 @@ partial class Person : IEquatable<Person> {
   }
   
   public static bool operator ==(Person a, Person b) {
-    return T4Immutable.Helpers.AreEqual(a, b);
+    return T4Immutable.Helpers.BasicAreEqual(a, b);
   }
   
   public static bool operator !=(Person a, Person b) {
-    return !T4Immutable.Helpers.AreEqual(a, b);
+    return !T4Immutable.Helpers.BasicAreEqual(a, b);
   }
   
   private readonly int _ImmutableHashCode;
@@ -267,17 +276,41 @@ partial class Person : IEquatable<Person> {
     return ImmutableToString();
   }
   
-  private Person ImmutableWith(T4Immutable.WithParam<string> firstName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<string> lastName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<int> age = default(T4Immutable.WithParam<int>)) {
+  private Person ImmutableWith(T4Immutable.OptParam<string> firstName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<string> lastName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<int> age = default(T4Immutable.OptParam<int>)) {
     return new Person(
-      !firstName.HasValue ? this.FirstName : firstName.Value,
-      !lastName.HasValue ? this.LastName : lastName.Value,
-      !age.HasValue ? this.Age : age.Value
+      firstName.HasValue ? firstName.Value : this.FirstName,
+      lastName.HasValue ? lastName.Value : this.LastName,
+      age.HasValue ? age.Value : this.Age
     );
   }
   
-  public Person With(T4Immutable.WithParam<string> firstName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<string> lastName = default(T4Immutable.WithParam<string>), T4Immutable.WithParam<int> age = default(T4Immutable.WithParam<int>)) {
+  public Person With(T4Immutable.OptParam<string> firstName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<string> lastName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<int> age = default(T4Immutable.OptParam<int>)) {
     return ImmutableWith(firstName, lastName, age);
   }
   
+  public class Builder {
+    [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.2.0"), System.Diagnostics.DebuggerNonUserCode]
+    public T4Immutable.OptParam<string> FirstName { get; set; }
+    [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.2.0"), System.Diagnostics.DebuggerNonUserCode]
+    public T4Immutable.OptParam<string> LastName { get; set; }
+    [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.2.0"), System.Diagnostics.DebuggerNonUserCode]
+    public T4Immutable.OptParam<int> Age { get; set; }
+    
+    public Builder With(T4Immutable.OptParam<string> firstName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<string> lastName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<int> age = default(T4Immutable.OptParam<int>)) {
+      if (firstName.HasValue) this.FirstName = firstName;
+      if (lastName.HasValue) this.LastName = lastName;
+      if (age.HasValue) this.Age = age;
+      return this;
+    }
+    
+    public Person Build() {
+      if (!this.FirstName.HasValue) throw new InvalidOperationException("Builder property 'FirstName' cannot be left unassigned");
+      if (!this.LastName.HasValue) throw new InvalidOperationException("Builder property 'LastName' cannot be left unassigned");
+      if (!this.Age.HasValue) this.Age = 18;
+      if (!this.Age.HasValue) throw new InvalidOperationException("Builder property 'Age' cannot be left unassigned");
+      return new Person(this.FirstName.Value, this.LastName.Value, this.Age.Value);
+    }
+  }
+ 
 }
 ```
