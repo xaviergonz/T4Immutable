@@ -55,8 +55,10 @@ public class PropInfo {
     return str;
   }
 
-  public string ToWithParam() {
-    return CustomNamespace + ".WithParam<" + TypeString + "> " + ParamName + " = default(T4Immutable.WithParam<" + TypeString + ">)";
+  public string ToOptParam(bool useParamName, bool includeDefault) {
+    var name = useParamName ? ParamName : Name;
+    var defaultPart = includeDefault ? " = default(T4Immutable.OptParam<" + TypeString + ">)" : "";
+    return CustomNamespace + ".OptParam<" + TypeString + "> " + name + defaultPart;
   }
 
   public void UpdateDefaultValue(List<FieldInfo> fields) {

@@ -16,7 +16,7 @@ namespace T4Immutable {
     /// <param name="a">First object.</param>
     /// <param name="b">Second object.</param>
     /// <returns>true if they are equal, false otherwise.</returns>
-    public static bool AreEqual<T>(T a, T b) {
+    public static bool BasicAreEqual<T>(T a, T b) {
       bool aIsNull = ReferenceEquals(a, null), bIsNull = ReferenceEquals(b, null);
       if (aIsNull && bIsNull) {
         return true;
@@ -24,8 +24,18 @@ namespace T4Immutable {
       if (aIsNull || bIsNull) {
         return false;
       }
-      var equals = a.Equals(b);
-      if (equals) {
+      return a.Equals(b);
+    }
+
+    /// <summary>
+    /// Check if two objects are equal, plus some special checking for KeyValuePairs and ICollections.
+    /// </summary>
+    /// <typeparam name="T">Object type.</typeparam>
+    /// <param name="a">First object.</param>
+    /// <param name="b">Second object.</param>
+    /// <returns>true if they are equal, false otherwise.</returns>
+    public static bool AreEqual<T>(T a, T b) {
+      if (BasicAreEqual(a, b)) {
         return true;
       }
 

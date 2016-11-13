@@ -40,7 +40,7 @@
     <Compile Include="Helpers.cs" />
     <Compile Include="KeyValuePairHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WithParam.cs" />
+    <Compile Include="OptParam.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="T4Immutable.nuspec" />

@@ -45,6 +45,8 @@ public class ClassInfo {
   public string ConstructorAccessLevel { get; private set; }
   public bool AllowCustomConstructors { get; private set; }
   public string PreConstructor { get; private set; }
+  public bool EnableBuilder { get; private set; }
+  public string BuilderAccessLevel { get; private set; }
 
   public ClassInfo(CodeClass thisClass) {
     CodeClass = (EnvDTE80.CodeClass2)thisClass;
@@ -112,6 +114,8 @@ public class ClassInfo {
     ConstructorAccessLevel = "public";
     AllowCustomConstructors = false;
     PreConstructor = null;
+    EnableBuilder = true;
+    BuilderAccessLevel = "public";
 
     // disable certain features depending on the attrib props
     foreach(var arg in ImmutableAttribute.Arguments.OfType<EnvDTE80.CodeAttributeArgument>()) {
@@ -120,6 +124,7 @@ public class ClassInfo {
       const string optionsArg = "Options";
       const string constructorAccessLevelArg = "ConstructorAccessLevel";
       const string preConstructorArg = "PreConstructor";
+      const string builderAccessLevelArg = "BuilderAccessLevel";
 
       if (arg.Name == optionsArg) {
         object parsed;
@@ -154,6 +159,9 @@ public class ClassInfo {
             case "AllowCustomConstructors":
               AllowCustomConstructors = true;
               break;
+            case "ExcludeBuilder":
+              EnableBuilder = false;
+              break;
             default:
               throw new T4ImmutableException(fileName, FullName, "Error parsing " + optionsArg + " argument of ImmutableClassAttribute");
           }
@@ -186,6 +194,35 @@ public class ClassInfo {
             break;
           default:
             throw new T4ImmutableException(fileName, FullName, "Error parsing " + constructorAccessLevelArg + " argument of ImmutableClassAttribute");
+        }
+      }
+      else if (arg.Name == builderAccessLevelArg) {
+        object parsed;
+        try {
+          parsed = Parser.ParseLiteral<object>(CustomNamespace + ".BuilderAccessLevel", val);
+        }
+        catch(ParserException ex) {
+          throw new T4ImmutableException(fileName, FullName, ex.Message);
+        }
+
+        switch(parsed.ToString()) {
+          case "Public":
+            BuilderAccessLevel = "public";
+            break;
+          case "Protected":
+            BuilderAccessLevel = "protected";
+            break;
+          case "Internal":
+            BuilderAccessLevel = "internal";
+            break;
+          case "Private":
+            BuilderAccessLevel = "private";
+            break;
+          case "ProtectedInternal":
+            BuilderAccessLevel = "protected internal";
+            break;
+          default:
+            throw new T4ImmutableException(fileName, FullName, "Error parsing " + builderAccessLevelArg + " argument of ImmutableClassAttribute");
         }
       }
       else if (arg.Name == preConstructorArg) {
