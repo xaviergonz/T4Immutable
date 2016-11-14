@@ -3,6 +3,7 @@
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
 #### Release notes
+* **[v1.2.1]** Now supports generating ToBuilder() and a better OptParam implementation.
 * **[v1.2.0]** Now supports generating builders.
 * **[v1.2.0]** WithParam class is now called OptParam.
 * **[v1.1.5]** Added a PreConstructor option to write code such as atributtes before generated constructors.
@@ -40,7 +41,11 @@ It will automatically generate for you in a separate partial class file the foll
 ```c#
 var builder = new Person.Builder().With(firstName: "John").With(lastName: "Doe"); // fluid way
 builder.Age = 21; // or via properties
+// that can be read back
+string firstName = builder.FirstName; // "John"
+var lastName = builder.LastName.Value; // "Doe"
 Person johnDoe = b.Build();
+var janeDoe = johnDoe.ToBuilder().With(firstName: "Jane", age: 20).Build(); // back and forth
 ```
 
 ## How do I start?
@@ -93,7 +98,8 @@ You sure can, just add to the ImmutableClass attribute something like this:
   ImmutableClassOptions.ExcludeToString | // do not generate a ToString() method
   ImmutableClassOptions.ExcludeWith | // do not generate a With() method
   ImmutableClassOptions.ExcludeConstructor | // do not generate a constructor
-  ImmutableClassOptions.ExcludeBuilder | // do not generate a builder (usually used alongside ExcludeConstructor)
+  ImmutableClassOptions.ExcludeBuilder | // do not generate a builder or ImmutableToBuilder() - implies ExcludeToBuilder (usually used alongside ExcludeConstructor)
+  ImmutableClassOptions.ExcludeToBuilder | // do not generate a builder or ToBuilder() method
   ImmutableClassOptions.AllowCustomConstructors)] // allow custom constructors
 ```
 Note that even if you exclude for example the `Equals()` method implementation you can still use them internally by invoking the `private bool ImmutableEquals(...)` implementation. This is done in case you might want to write your own `Equals()` yet still use the generated one as a base.
@@ -285,12 +291,21 @@ partial class Person : IEquatable<Person> {
     return ImmutableWith(firstName, lastName, age);
   }
   
+  public Person.Builder ToBuilder() {
+    return ImmutableToBuilder();
+  }
+  
+  private Person.Builder ImmutableToBuilder() {
+    return new Person.Builder().With(
+      new T4Immutable.OptParam<string>(this.FirstName),
+      new T4Immutable.OptParam<string>(this.LastName),
+      new T4Immutable.OptParam<int>(this.Age)
+    );
+  }
+  
   public class Builder {
-    [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.2.0"), System.Diagnostics.DebuggerNonUserCode]
     public T4Immutable.OptParam<string> FirstName { get; set; }
-    [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.2.0"), System.Diagnostics.DebuggerNonUserCode]
     public T4Immutable.OptParam<string> LastName { get; set; }
-    [T4Immutable.GeneratedCode, System.CodeDom.Compiler.GeneratedCode("T4Immutable", "1.2.0"), System.Diagnostics.DebuggerNonUserCode]
     public T4Immutable.OptParam<int> Age { get; set; }
     
     public Builder With(T4Immutable.OptParam<string> firstName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<string> lastName = default(T4Immutable.OptParam<string>), T4Immutable.OptParam<int> age = default(T4Immutable.OptParam<int>)) {
@@ -307,7 +322,6 @@ partial class Person : IEquatable<Person> {
       if (!this.Age.HasValue) throw new InvalidOperationException("Builder property 'Age' cannot be left unassigned");
       return new Person(this.FirstName.Value, this.LastName.Value, this.Age.Value);
     }
-  }
- 
+  }  
 }
 ```
