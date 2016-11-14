@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace T4Immutable {
   internal static class KeyValuePairHelper {
@@ -12,7 +13,8 @@ namespace T4Immutable {
     }
 
     public static bool IsKeyValuePair(Type type) {
-      if (!type.IsGenericType || type.IsGenericTypeDefinition) {
+      var typeInfo = type.GetTypeInfo();
+      if (!typeInfo.IsGenericType || typeInfo.IsGenericTypeDefinition) {
         return false;
       }
       var genericType = type.GetGenericTypeDefinition();

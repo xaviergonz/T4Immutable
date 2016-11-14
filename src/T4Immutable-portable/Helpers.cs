@@ -113,7 +113,7 @@ namespace T4Immutable {
     /// <param name="objs">Objects to make the hash code for.</param>
     /// <returns>A hashcode.</returns>
     public static int GetHashCodeFor(params object[] objs) {
-      if (objs.LongLength == 0) {
+      if (objs.Length == 0) {
         return 0;
       }
 

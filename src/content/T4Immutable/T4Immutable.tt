@@ -33,10 +33,19 @@ var curProject = VSH.CurrentProject;
 var curProjectDir = System.IO.Path.GetDirectoryName(curProject.FullName);
 Parser.ReadAttributesCs(curProjectDir);
 
+// .net core does not automatically remove old generated files, so we do it ourselves
+var oldFiles = Directory.GetFiles(System.IO.Path.Combine(curProjectDir, "T4Immutable"));
+foreach (var oldFile in oldFiles) {
+  if (oldFile.EndsWith(".t4g.cs")) {
+    File.Delete(oldFile);
+  }
+}
+
 var allProjectItems = VSH.GetAllProjectItems();
 foreach (ProjectItem pitem in allProjectItems) {
   var fileName = pitem.Name;
   if (!fileName.ToLowerInvariant().EndsWith(".cs")) continue;
+  if (fileName.ToLowerInvariant().EndsWith(".t4g.cs")) continue;
 
   var codeModel = pitem.FileCodeModel;
   if (codeModel == null || codeModel.CodeElements == null) continue;
@@ -58,7 +67,7 @@ foreach (ProjectItem pitem in allProjectItems) {
     }
     outFileNamesUsed.Add(realOutFileName.ToLowerInvariant());
 
-    realOutFileName += ".generated.cs";
+    realOutFileName += ".t4g.cs";
 
     manager.StartNewFile(realOutFileName);
     

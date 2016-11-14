@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace T4Immutable {
   /// <summary>
@@ -6,7 +7,6 @@ namespace T4Immutable {
   /// It is a struct because structs are not nullable and then we can use null and get it transformed to the value type.
   /// </summary>
   /// <typeparam name="T">Value type</typeparam>
-  [Serializable]
   public struct OptParam<T> {
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     private bool _hasValue;
@@ -128,12 +128,13 @@ namespace T4Immutable {
         throw new ArgumentNullException(nameof(optParamType));
       }
 
-      if (!optParamType.IsGenericType || optParamType.IsGenericTypeDefinition) {
+      var typeInfo = optParamType.GetTypeInfo();
+      if (!typeInfo.IsGenericType || typeInfo.IsGenericTypeDefinition) {
         return null;
       }
 
       var genericType = optParamType.GetGenericTypeDefinition();
-      return ReferenceEquals(genericType, typeof(OptParam<>)) ? optParamType.GetGenericArguments()[0] : null;
+      return ReferenceEquals(genericType, typeof(OptParam<>)) ? typeInfo.GenericTypeArguments[0] : null;
     }
   }
 }
