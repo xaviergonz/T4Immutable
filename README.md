@@ -56,7 +56,7 @@ var janeDoe = johnDoe.ToBuilder().With(firstName: "Jane", age: 20).Build(); // b
 
 *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates before build such as [AutoT4](https://github.com/bennor/AutoT4).
 
-### New-style (.NET Core, .NET Standard, UWP, Portable Class Libraries...)
+#### New-style (.NET Core, .NET Standard, UWP, Portable Class Libraries...)
 Since right now NuGet does not support copying files to the project itself you will need to follow the next steps:
 
 1. Install the T4Immutable nuget package
