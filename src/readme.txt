@@ -29,4 +29,4 @@ You will need to do 2 and 3 everytime you update this nuget package.
 
 As soon as NuGet gets better support for this (or someone tells me how to do it) for 
 new-style projects there will be an update to do this automatically like it is done for 
-standard .NET projects.
+old-style .NET projects.
