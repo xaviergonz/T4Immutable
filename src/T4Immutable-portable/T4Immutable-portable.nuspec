@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package >
-  <metadata minClientVersion="3.4">
+  <metadata>
     <id>T4Immutable</id>
-    <version>1.3.0-alpha3</version>
+    <version>1.3.0-alpha9</version>
     <title>T4Immutable</title>
     <authors>Javier González Garcés</authors>
     <owners>xaviergonz</owners>
@@ -14,12 +14,25 @@
     <copyright>Copyright © 2016 Javier González Garcés</copyright>
     <tags>t4 immutable codegen</tags>
     <dependencies>
-      <!--<dependency id="Microsoft.CSharp" version="4.0.0"/>-->
+      <!-- apparently not needed?
+      <dependency id="Microsoft.CSharp" version="4.0.0"/>
+      -->
     </dependencies>
+    <!-- this apparently does not work as intended for project.json files
+    <contentFiles>
+      <files include="**/*.cs_" buildAction="None"/>
+      <files include="**/*.ttinclude" buildAction="None"/>
+      <files include="**/*.t4" buildAction="Content"/>
+    </contentFiles>
+    -->
   </metadata>
   <files>
     <file src="bin\Release\T4Immutable.dll" target="lib\netstandard1.1\T4Immutable.dll" />
     <file src="bin\Release\T4Immutable.xml" target="lib\netstandard1.1\T4Immutable.xml" />
+    <file src="..\readme.txt" target=""/>
     <file src="..\content\**\*.*" target="content"/>
+    <!-- no point since this does not copy the files to the solution    
+    <file src="..\content\**\*.*" target="contentFiles\any\any"/>
+    -->
   </files>
 </package>
