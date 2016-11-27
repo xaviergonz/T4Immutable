@@ -71,13 +71,13 @@ var janeDoe = johnDoe.ToBuilder().With(firstName: "Jane", age: 20).Build(); // b
 ```
 
 ## <a name="starting"></a>How do I start?
-#### Old-style (.NET Framework) projects
+#### Old-style projects (.NET Framework)
 1. Install the T4Immutable nuget package
 2. Use "**Build - Transform All T4 Templates**" or right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". 
 
 *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates before build such as [AutoT4](https://github.com/bennor/AutoT4).
 
-#### New-style (.NET Core, .NET Standard, UWP, Portable Class Libraries...) projects
+#### New-style projects (.NET Core, .NET Standard, UWP, Portable Class Libraries...)
 Since right now NuGet does not support copying files to the project itself you will need to follow the next steps:
 
 1. Install the T4Immutable nuget package
