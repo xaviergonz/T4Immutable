@@ -83,7 +83,8 @@ Since right now NuGet does not support copying files to the project itself you w
 1. Install the T4Immutable nuget package
 2. Create a folder in the root of your project named "T4Immutable"
 3. Download the T4Immutable sources at https://github.com/xaviergonz/T4Immutable/archive/master.zip
-4. Extract the folder _src/content/T4Immutable_ (inside the ZIP) to the _T4Immutable_ folder of your project
+4. Create a folder in your project named _T4Immutable_ and make sure it is empty
+5. Extract the folder _src/content/T4Immutable_ (inside the ZIP) to the _T4Immutable_ folder of your project
 
 "**Build - Transform All T4 Templates**" **won't work**, so you will need to right click the file _T4Immutable/T4Immutable.tt_ and click on "**Run custom tool**" whenever you want to regenerate your templates.
 
