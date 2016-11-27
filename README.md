@@ -3,7 +3,7 @@
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
 
-## Table of Contents
+## Table of contents
 * [Why use this?](#why)
 * [How do I start?](#starting)
 * [What's needed to make an immutable class?](#basics)
