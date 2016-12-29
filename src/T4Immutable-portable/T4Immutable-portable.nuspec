@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>T4Immutable</id>
-    <version>1.3.1</version>
+    <version>1.3.2</version>
     <title>T4Immutable</title>
     <authors>Javier González Garcés</authors>
     <owners>xaviergonz</owners>
@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/xaviergonz/T4Immutable</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes. </description>
-    <releaseNotes>Made it a portable library.</releaseNotes>
+    <releaseNotes>Fixed equals operator.</releaseNotes>
     <copyright>Copyright © 2016 Javier González Garcés</copyright>
     <tags>t4 immutable codegen</tags>
     <dependencies>

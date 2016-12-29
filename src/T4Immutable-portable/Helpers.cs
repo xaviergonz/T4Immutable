@@ -35,7 +35,14 @@ namespace T4Immutable {
     /// <param name="b">Second object.</param>
     /// <returns>true if they are equal, false otherwise.</returns>
     public static bool AreEqual<T>(T a, T b) {
-      if (BasicAreEqual(a, b)) {
+      bool aIsNull = ReferenceEquals(a, null), bIsNull = ReferenceEquals(b, null);
+      if (aIsNull && bIsNull) {
+        return true;
+      }
+      if (aIsNull || bIsNull) {
+        return false;
+      }
+      if (a.Equals(b)) {
         return true;
       }
 
