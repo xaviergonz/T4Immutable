@@ -24,6 +24,7 @@
 * [Can I see the extra code generated for the very first example?](#generated-code-sample)
 
 #### Release notes
+* **[v1.3.2]** Fixed the generated equals operator (sometimes it would crash when the first item was null).
 * **[v1.3.1]** Made the library portable, however please check the notes inside 'How do I start?' about portable projects.
 * **[v1.2.1]** Now supports generating ToBuilder() and a better OptParam implementation.
 * **[v1.2.0]** Now supports generating builders.
