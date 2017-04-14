@@ -229,6 +229,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
       fw.WI(ind, "return true;");
     }
     else {
+      fw.WI(ind, "if (ImmutableGetHashCode() !== obj.ImmutableGetHashCode()) return false;");
       fw.WI(ind, "return " + string.Join(" && ", allProps.Select(p => CustomNamespace + ".Helpers.AreEqual(this." + p.Name + ", obj." + p.Name + ")")) + ";");
     }
     ind--;
