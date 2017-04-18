@@ -110,9 +110,9 @@ They just work as long as they inherit from `ICollection` (as all of the basic o
 
 ## <a name="serialization"></a>Do generated classes serialize/deserialize correctly with JSON.NET / Protobuf.NET / others?
 #### JSON.NET
-* If you use a *public generated constructor* just add `JsonIgnore` to computed properties.
-* If you use a *non-public generated constructor* then:
-
+##### If you use a *public generated constructor*
+Just add `JsonIgnore` to computed properties.
+##### If you use a *non-public generated constructor*
 Use `PreConstructor = "[Newtonsoft.Json.JsonConstructor]"` inside the `ImmutableClass` attribute. (Recommended over the next option)
 
 Alternatively:
