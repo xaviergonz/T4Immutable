@@ -23,21 +23,29 @@
 // Debugger.Launch();
 // Debugger.Break();
 
-var manager = TemplateFileManager.Create(this);
+var curProject = VSH.CurrentProject;
+var curProjectDir = System.IO.Path.GetDirectoryName(curProject.FullName);
+var t4ProjectDir = Path.Combine(curProjectDir, "T4Immutable_generated");
+
+// we are in isolated mode (e.g. .net core) if the template folder is not directly a subfolder of the project
+var isolatedMode = Path.GetFullPath(Path.Combine(curProjectDir, "T4Immutable")) != Path.GetFullPath(Path.GetDirectoryName(VSH.Host.TemplateFile));
+
+var manager = TemplateFileManager.Create(this, isolatedMode ? t4ProjectDir : null);
 //manager.IsAutoIndentEnabled = true; // this makes generation unreliable (and slower) when set to true
 manager.CanOverrideExistingFile = true;
 var outFileNamesUsed = new HashSet<string>();
 
 // init the parser
-var curProject = VSH.CurrentProject;
-var curProjectDir = System.IO.Path.GetDirectoryName(curProject.FullName);
-Parser.ReadAttributesCs(curProjectDir);
+Parser.ReadAttributesCs(Path.GetDirectoryName(VSH.Host.TemplateFile));
 
-// .net core does not automatically remove old generated files, so we do it ourselves
-var oldFiles = Directory.GetFiles(System.IO.Path.Combine(curProjectDir, "T4Immutable"));
-foreach (var oldFile in oldFiles) {
-  if (oldFile.EndsWith(".t4g.cs")) {
-    File.Delete(oldFile);
+// .net core does not automatically remove old generated files and does not allow writing to the t4 folder directly, so we do it ourselves
+if (isolatedMode) {
+  Directory.CreateDirectory(t4ProjectDir);
+  var oldFiles = Directory.GetFiles(t4ProjectDir);
+  foreach (var oldFile in oldFiles) {
+    if (oldFile.EndsWith(".t4g.cs")) {
+      File.Delete(oldFile);
+    }
   }
 }
 
@@ -90,7 +98,6 @@ foreach (ProjectItem pitem in allProjectItems) {
 }
 
 manager.Process();
-
 #>
 <#+
 static void WriteHeader(ClassWriter fw) {
@@ -229,7 +236,7 @@ static void ProcessClass(string fileName, ClassInfo info, ClassWriter fw) {
       fw.WI(ind, "return true;");
     }
     else {
-      fw.WI(ind, "if (ImmutableGetHashCode() !== obj.ImmutableGetHashCode()) return false;");
+      fw.WI(ind, "if (ImmutableGetHashCode() != obj.ImmutableGetHashCode()) return false;");
       fw.WI(ind, "return " + string.Join(" && ", allProps.Select(p => CustomNamespace + ".Helpers.AreEqual(this." + p.Name + ", obj." + p.Name + ")")) + ";");
     }
     ind--;

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>T4Immutable</AssemblyName>
+    <RootNamespace>T4Immutable</RootNamespace>
+    <PackageId>T4Immutable</PackageId>
+    <Description>T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.</Description>
+    <Version>1.4.4</Version>
+    <Authors>Javier González Garcés</Authors>
+    <Company />
+    <Product>T4Immutable</Product>
+    <Copyright>Copyright © 2016-2017 Javier González Garcés</Copyright>
+    <PackageLicenseUrl>https://github.com/xaviergonz/T4Immutable/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/xaviergonz/T4Immutable</PackageProjectUrl>
+    <PackageTags>t4 immutable codegen</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\T4Immutable.xml</DocumentationFile>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\Debug\netstandard2.0\</OutputPath>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="echo Copying Attributes.cs to content folder&#xD;&#xA;cd $(ProjectDir)&#xD;&#xA;copy Attributes.cs ..\content\T4Immutable\Attributes.cs_&#xD;&#xA;cd $(TargetDir)" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.4.0" />
+  </ItemGroup>
+
+</Project>

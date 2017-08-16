@@ -23,7 +23,7 @@ public static class Parser {
 
   public static void ReadAttributesCs(string projPath) {
     // read the file contents
-    _AttributesCs = File.ReadAllText(Path.Combine(projPath, "T4Immutable", "Attributes.cs_"));
+    _AttributesCs = File.ReadAllText(Path.Combine(projPath, "Attributes.cs_"));
   }
 
   public static string[] SplitEnumFields(object e) {

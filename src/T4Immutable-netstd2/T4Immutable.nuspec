@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata minClientVersion="3.3">
+    <id>T4Immutable</id>
+    <version>1.4.4</version>
+    <title>T4Immutable</title>
+    <authors>Javier González Garcés</authors>
+    <owners>Javier González Garcés</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/xaviergonz/T4Immutable/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/xaviergonz/T4Immutable</projectUrl>
+    <description>T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.</description>
+    <releaseNotes>Ported library to .NET standard 2.0</releaseNotes>
+    <copyright>Copyright © 2016-2017 Javier González Garcés</copyright>
+    <tags>t4 immutable codegen</tags>    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Microsoft.CSharp" version="4.4.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+
+    <!-- for core projects -->
+    <contentFiles>
+      <files include="any/any/**/*.cs_" buildAction="None"/>
+      <files include="any/any/**/*.ttinclude" buildAction="None"/>
+      <files include="any/any/**/*.tt" buildAction="Content"/>
+    </contentFiles>
+  </metadata>
+
+  <files>
+    <file src="bin\Release\netstandard2.0\T4Immutable.dll" target="lib\netstandard2.0\T4Immutable.dll" />
+    <file src="bin\Release\netstandard2.0\T4Immutable.xml" target="lib\netstandard2.0\T4Immutable.xml" />
+    <file src="..\readme.txt" target=""/>
+    <!-- for framework projects -->
+    <file src="..\content\**\*.*" target="content"/>
+    <!-- for core projects -->
+    <file src="..\content\**\*.*" target="contentFiles\any\any"/>
+  </files>
+
+</package>

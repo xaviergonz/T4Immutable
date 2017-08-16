@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{9B18F400-9723-41A7-BFE9-9566F5BBF812}"
 EndProject
@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4Immutable", "T4Immutable"
 		content\T4Immutable\Attributes.cs_ = content\T4Immutable\Attributes.cs_
 		content\T4Immutable\Class.ttinclude = content\T4Immutable\Class.ttinclude
 		content\T4Immutable\Field.ttinclude = content\T4Immutable\Field.ttinclude
+		content\T4Immutable\Parser.ttinclude = content\T4Immutable\Parser.ttinclude
 		content\T4Immutable\Prop.ttinclude = content\T4Immutable\Prop.ttinclude
 		content\T4Immutable\Shared.ttinclude = content\T4Immutable\Shared.ttinclude
 		content\T4Immutable\Struct.ttinclude = content\T4Immutable\Struct.ttinclude
@@ -18,12 +19,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4Immutable", "T4Immutable"
 		content\T4Immutable\VisualStudioHelper.ttinclude = content\T4Immutable\VisualStudioHelper.ttinclude
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T4Immutable-portable", "T4Immutable-portable\T4Immutable-portable.csproj", "{C569B582-2D4F-45ED-964B-412E032A37C4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6E1256F3-7EC3-4676-9CE5-7D6379A12D86}"
 	ProjectSection(SolutionItems) = preProject
 		readme.txt = readme.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T4Immutable-netstd2", "T4Immutable-netstd2\T4Immutable-netstd2.csproj", "{0A801419-750F-461A-B2B7-33636AFD08A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,15 +32,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C569B582-2D4F-45ED-964B-412E032A37C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C569B582-2D4F-45ED-964B-412E032A37C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C569B582-2D4F-45ED-964B-412E032A37C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C569B582-2D4F-45ED-964B-412E032A37C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A801419-750F-461A-B2B7-33636AFD08A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A801419-750F-461A-B2B7-33636AFD08A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A801419-750F-461A-B2B7-33636AFD08A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A801419-750F-461A-B2B7-33636AFD08A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1CC7F4B4-E394-495B-90BD-5B1C6420CC90} = {9B18F400-9723-41A7-BFE9-9566F5BBF812}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D070AD69-D534-4B89-9B92-7EB6068A5580}
 	EndGlobalSection
 EndGlobal

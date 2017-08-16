@@ -90,6 +90,7 @@ Microsoft.VisualStudio.VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid;
 /// <author>R. Leupold</author>
 public class TemplateFileManager
 {
+  private string outputFolder; // CHANGED
 	private EnvDTE.ProjectItem templateProjectItem;
     private Action<string> checkOutAction;
     private Action<IEnumerable<OutputFile>> projectSyncAction;
@@ -99,11 +100,13 @@ public class TemplateFileManager
     /// <summary>
     /// Creates files with VS sync
     /// </summary>
-    public static TemplateFileManager Create(object textTransformation)
+    public static TemplateFileManager Create(object textTransformation, string outputFolder)  // CHANGED
     {
         DynamicTextTransformation2 transformation = DynamicTextTransformation2.Create(textTransformation);
         IDynamicHost2 host = transformation.Host;
-        return new TemplateFileManager(transformation);
+        var instance = new TemplateFileManager(transformation);
+        instance.outputFolder = outputFolder;  // CHANGED
+        return instance;
     }
 
     private readonly List<Block> files = new List<Block>();
@@ -238,7 +241,7 @@ public class TemplateFileManager
 
             foreach (var block in files)
             {
-				var outputPath = VSHelper.GetOutputPath(dte, block, Path.GetDirectoryName(_textTransformation.Host.TemplateFile));
+				var outputPath = VSHelper.GetOutputPath(dte, block, outputFolder != null ? outputFolder : Path.GetDirectoryName(_textTransformation.Host.TemplateFile)); // CHANGED
                 var fileName = Path.Combine(outputPath, block.Name);
                 var content = this.ReplaceParameter(headerText, block) + 
 				_generationEnvironment.ToString(block.Start, block.Length) + 
@@ -499,7 +502,13 @@ public class TemplateFileManager
         {
             if (!projectFiles.ContainsKey(fileName.FileName))
             {
-                templateProjectItem.ProjectItems.AddFromFile(fileName.FileName);
+                // CHANGED TO IGNORE CERTAIN EXCEPTIONS
+                try {
+                    templateProjectItem.ProjectItems.AddFromFile(fileName.FileName);
+                }
+                catch (System.NotSupportedException) {
+                    // do nothing, probably on a .net core project
+                }
             }
         }
     }
