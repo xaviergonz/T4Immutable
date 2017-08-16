@@ -24,6 +24,7 @@
 * [Can I see the extra code generated for the very first example?](#generated-code-sample)
 
 #### Release notes
+* **[v1.4.4]** Added proper support for .NET Standard 2.0. Fixed an issued with ImmutableGetHashCode generation.
 * **[v1.3.3]** ImmutableEquals now uses ImmutableGetHashCode as a speed optimization.
 * **[v1.3.2]** Fixed the generated equals operator (sometimes it would crash when the first item was null).
 * **[v1.3.1]** Made the library portable, however please check the notes inside 'How do I start?' about portable projects.
