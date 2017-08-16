@@ -1,5 +1,5 @@
 # T4Immutable
-###T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
+### T4Immutable is a T4 template for C# .NET apps that generates code for immutable classes.
 
 [![NuGet package](https://img.shields.io/nuget/v/T4Immutable.svg)](https://nuget.org/packages/T4Immutable)
 
@@ -24,6 +24,7 @@
 * [Can I see the extra code generated for the very first example?](#generated-code-sample)
 
 #### Release notes
+* **[v1.3.3]** ImmutableEquals now uses ImmutableGetHashCode as a speed optimization.
 * **[v1.3.2]** Fixed the generated equals operator (sometimes it would crash when the first item was null).
 * **[v1.3.1]** Made the library portable, however please check the notes inside 'How do I start?' about portable projects.
 * **[v1.2.1]** Now supports generating ToBuilder() and a better OptParam implementation.
@@ -109,15 +110,17 @@ They just work as long as they inherit from `ICollection` (as all of the basic o
 
 ## <a name="serialization"></a>Do generated classes serialize/deserialize correctly with JSON.NET / Protobuf.NET / others?
 #### JSON.NET
-* If you use a *public generated constructor* just add `JsonIgnore` to computed properties.
-* If you use a *non-public generated constructor* then:
-  1. Either use `PreConstructor = "[Newtonsoft.Json.JsonConstructor]"` inside the `ImmutableClass` attribute. (Recommended over the next option)
-  2. Or:
-    1. Add the `ImmutableClassOptions.AllowCustomConstructors` to the `Options` parameter of the `ImmutableClass` attribute.
-    2. Add a constructor with no arguments.
-    3. Add a private/protected setter to all your non-computed properties if they didn't have any.
-    4. Add `JsonIgnore` to computed properties.
-    5. NB: In this case JSON.net will call the constructor and then _later_ set the properties one by one.
+##### If you use a *public generated constructor*
+Just add `JsonIgnore` to computed properties.
+##### If you use a *non-public generated constructor*
+Use `PreConstructor = "[Newtonsoft.Json.JsonConstructor]"` inside the `ImmutableClass` attribute. (Recommended over the next option)
+
+Alternatively:
+  1. Add the `ImmutableClassOptions.AllowCustomConstructors` to the `Options` parameter of the `ImmutableClass` attribute.
+  2. Add a constructor with no arguments.
+  3. Add a private/protected setter to all your non-computed properties if they didn't have any.
+  4. Add `JsonIgnore` to computed properties.
+  5. NB: In this case JSON.net will call the constructor and then _later_ set the properties one by one.
 
 #### Protobuf.NET
 1. Mark your class as `[ProtoContract]`.
@@ -284,6 +287,7 @@ partial class Person : IEquatable<Person> {
   private bool ImmutableEquals(Person obj) {
     if (ReferenceEquals(this, obj)) return true;
     if (ReferenceEquals(obj, null)) return false;
+    if (ImmutableGetHashCode() !== obj.ImmutableGetHashCode()) return false;
     return T4Immutable.Helpers.AreEqual(this.FirstName, obj.FirstName) && T4Immutable.Helpers.AreEqual(this.LastName, obj.LastName) && T4Immutable.Helpers.AreEqual(this.Age, obj.Age);
   }
   
