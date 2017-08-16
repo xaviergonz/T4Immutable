@@ -273,7 +273,7 @@ partial class Person : IEquatable<Person> {
   private bool ImmutableEquals(Person obj) {
     if (ReferenceEquals(this, obj)) return true;
     if (ReferenceEquals(obj, null)) return false;
-    if (ImmutableGetHashCode() !== obj.ImmutableGetHashCode()) return false;
+    if (ImmutableGetHashCode() != obj.ImmutableGetHashCode()) return false;
     return T4Immutable.Helpers.AreEqual(this.FirstName, obj.FirstName) && T4Immutable.Helpers.AreEqual(this.LastName, obj.LastName) && T4Immutable.Helpers.AreEqual(this.Age, obj.Age);
   }
   
