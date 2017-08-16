@@ -73,26 +73,11 @@ var janeDoe = johnDoe.ToBuilder().With(firstName: "Jane", age: 20).Build(); // b
 ```
 
 ## <a name="starting"></a>How do I start?
-#### Old-style projects (.NET Framework)
 1. Install the T4Immutable nuget package
-2. Use "**Build - Transform All T4 Templates**" or right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". 
+2. For **.NET Framework projects** use "**Build - Transform All T4 Templates**" or right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". The files will be generated inside "T4Immutable" as children of "T4Immutable.tt".
+3. For **.NET Core/Standard/etc projects** right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". The files will be generated in a folder named "T4Immutable_generated". "**Build - Transform All T4 Templates**" **won't work**
 
 *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates before build such as [AutoT4](https://github.com/bennor/AutoT4).
-
-#### New-style projects (.NET Core, .NET Standard, UWP, Portable Class Libraries...)
-Since right now NuGet does not support copying files to the project itself you will need to follow the next steps:
-
-1. Install the T4Immutable nuget package
-2. Create a folder in the root of your project named "T4Immutable"
-3. Download the T4Immutable sources at https://github.com/xaviergonz/T4Immutable/archive/master.zip
-4. Create a folder in your project named _T4Immutable_ and make sure it is empty
-5. Extract the folder _src/content/T4Immutable_ (inside the ZIP) to the _T4Immutable_ folder of your project
-
-"**Build - Transform All T4 Templates**" **won't work**, so you will need to right click the file _T4Immutable/T4Immutable.tt_ and click on "**Run custom tool**" whenever you want to regenerate your templates.
-
-_You will need to do 2 and 3 everytime you update this nuget package._
-
-As soon as NuGet gets better support for this (or someone tells me how to do it) for new-style projects there will be an update to do this automatically like it is done for old-style .NET projects.
 
 ## <a name="basics"></a>What's needed to make an immutable class?
 Just mark the class with the use the `[ImmutableClass]` attribute. The class will be auto-checked to meet the following constraints before code generation takes place:
