@@ -75,8 +75,8 @@ var janeDoe = johnDoe.ToBuilder().With(firstName: "Jane", age: 20).Build(); // b
 
 ## <a name="starting"></a>How do I start?
 1. Install the T4Immutable nuget package
-2. For **.NET Framework projects** use "**Build - Transform All T4 Templates**" or right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". The files will be generated inside "T4Immutable" as children of "T4Immutable.tt".
-3. For **.NET Core/Standard/etc projects** right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". The files will be generated in a folder named "T4Immutable_generated". "**Build - Transform All T4 Templates**" **won't work**
+2. For **.NET Framework projects** use "**Build - Transform All T4 Templates**" or right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". The files will be generated inside _T4Immutable_ as children of _T4Immutable.tt_.
+3. For **.NET Core/Standard/etc projects** right click on the _T4Immutable/T4Immutable.tt_ file and click "**Run custom tool**". The files will be generated in a folder named _T4Immutable_generated_. "**Build - Transform All T4 Templates**" **won't work**
 
 *Remember to do this everytime you update the package or any of your immutable classes change.* If you want to automate it there are plugins out there that auto-run T4 templates before build such as [AutoT4](https://github.com/bennor/AutoT4).
 
