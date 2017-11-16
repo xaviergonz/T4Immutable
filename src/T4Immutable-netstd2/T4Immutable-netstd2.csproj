@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
     <AssemblyName>T4Immutable</AssemblyName>
     <RootNamespace>T4Immutable</RootNamespace>
     <PackageId>T4Immutable</PackageId>
@@ -15,7 +15,8 @@
     <PackageProjectUrl>https://github.com/xaviergonz/T4Immutable</PackageProjectUrl>
     <PackageTags>t4 immutable codegen</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -30,6 +31,15 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="echo Copying Attributes.cs to content folder&#xD;&#xA;cd $(ProjectDir)&#xD;&#xA;copy Attributes.cs ..\content\T4Immutable\Attributes.cs_&#xD;&#xA;cd $(TargetDir)" />
   </Target>
+
+  <ItemGroup>
+    <Content Include="..\readme.txt">
+      <PackagePath>readme.txt</PackagePath>
+    </Content>
+    <Content Include="..\content\**\*">
+      <PackagePath>contentFiles\any\any;content</PackagePath>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.4.0" />
